@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Entrar — Gestão de Convidados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin/css/styles.css">
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-visual" aria-hidden="true">
+      <div class="auth-visual__content">
+        <span class="auth-seal">GC</span>
+        <p class="auth-visual__eyebrow">Gestão de convidados</p>
+        <h1>Organize cada presença com tranquilidade.</h1>
+        <p>Cadastre famílias, acompanhe confirmações e envie convites personalizados em um único lugar.</p>
+      </div>
+      <small>Área administrativa protegida</small>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-box" id="loginBox">
+        <span class="eyebrow">Área administrativa</span>
+        <h2>Bem-vindo de volta</h2>
+        <p class="auth-copy">Entre com o e-mail e a senha cadastrados para acessar o painel.</p>
+
+        <div class="auth-message auth-message--success" id="loginNotice" hidden></div>
+
+        <form id="loginForm" class="form-stack">
+          <label><span>E-mail</span><input type="email" name="email" required autocomplete="email" placeholder="voce@exemplo.com"></label>
+          <label>
+            <span>Senha</span>
+            <div class="password-field">
+              <input type="password" name="password" id="loginPassword" required autocomplete="current-password" placeholder="Sua senha">
+              <button type="button" class="password-toggle" data-toggle-password="loginPassword" aria-label="Mostrar senha">Mostrar</button>
+            </div>
+          </label>
+          <div class="auth-row"><button type="button" class="auth-link" id="forgotButton">Esqueci minha senha</button></div>
+          <button class="btn btn--primary btn--block" id="loginButton" type="submit">Entrar no painel</button>
+          <p class="form-status" id="loginStatus" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="demo-access" id="demoAccess" hidden>
+          <span>Modo de demonstração</span>
+          <button class="btn btn--secondary btn--block" id="demoButton" type="button">Abrir painel demo</button>
+        </div>
+      </div>
+
+      <div class="auth-box" id="forgotBox" hidden>
+        <button class="auth-back" id="backToLogin" type="button">← Voltar</button>
+        <span class="eyebrow">Recuperação de acesso</span>
+        <h2>Redefinir senha</h2>
+        <p class="auth-copy">Informe seu e-mail. Se houver uma conta cadastrada, enviaremos um link para criar uma nova senha.</p>
+        <form id="forgotForm" class="form-stack">
+          <label><span>E-mail</span><input type="email" name="email" required autocomplete="email" placeholder="voce@exemplo.com"></label>
+          <button class="btn btn--primary btn--block" id="forgotSubmit" type="submit">Enviar link de recuperação</button>
+          <p class="form-status" id="forgotStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <p class="auth-foot">O acesso ao painel é individual. Não compartilhe sua senha.</p>
+    </section>
+  </main>
+
+  <script src="admin/js/config.js"></script>
+  <script type="module" src="admin/js/login.js"></script>
+</body>
+</html>

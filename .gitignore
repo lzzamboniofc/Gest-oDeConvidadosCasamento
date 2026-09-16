@@ -1,0 +1,32 @@
+# Segredos / variáveis locais
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependências / builds
+node_modules/
+dist/
+build/
+.cache/
+
+# Supabase local
+.supabase/
+supabase/.temp/
+
+# Editores / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs / arquivos temporários
+*.log
+*.tmp
+*.temp
+~$*.xlsx
+
+# Backups locais
+*.bak
+*.backup

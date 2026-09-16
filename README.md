@@ -1,47 +1,116 @@
-# Sistema de Convidados + Convite Nível 3 Integrado — v1.3
+# Sistema de Convidados + Convites de Casamento
 
-Este pacote contém:
+Estrutura organizada para versionamento no GitHub e publicação pelo **GitHub Pages**.
 
-- `controle-convidados/` — painel administrativo, login, importação/exportação Excel, SQL e Edge Function para Supabase;
-- `ConviteCasamento-Nivel3-Integrado/` — cópia do Nível 3 preparada para usar `?convite=TOKEN` e membros individuais do convite.
+## Estrutura
 
-Comece por `controle-convidados/README.md`.
+```text
+/
+├── index.html                 # Login administrativo (entrada do GitHub Pages)
+├── reset-password.html        # Recuperação de senha
+├── admin/                     # Painel de gestão
+│   ├── index.html
+│   ├── css/
+│   └── js/
+├── convites/
+│   ├── nivel-1/
+│   ├── nivel-2/
+│   ├── nivel-3/               # Integrado ao sistema de convidados
+│   └── nivel-4/
+├── modelos/
+│   └── modelo-importacao-convidados.xlsx
+├── supabase/
+│   ├── schema.sql
+│   ├── migration_v1_2_to_v1_3.sql
+│   └── functions/invite-public/
+├── .gitignore
+├── .nojekyll
+└── CHANGELOG.md
+```
 
-## Novidades da v1.3
+## GitHub Pages
 
-A v1.3 é focada em administração dos convidados:
+1. Crie um repositório no GitHub.
+2. Envie **o conteúdo desta pasta** para a raiz do repositório.
+3. No GitHub, abra **Settings → Pages**.
+4. Em *Build and deployment*, escolha **Deploy from a branch**.
+5. Selecione a branch `main` e a pasta `/ (root)`.
+6. Salve.
 
-- painel com métricas separando **convites**, **lugares** e **pessoas confirmadas**;
-- taxa de resposta dos convites;
-- cadastro opcional dos membros de cada família/convite;
-- RSVP do convite integrado pode mostrar os membros e permitir selecionar exatamente quem irá;
-- importação Excel aceita a nova coluna opcional `membros`;
-- exportação da lista completa para **Excel (.xlsx)** e **CSV**;
-- exportação inclui status, confirmados, nomes confirmados, restrição alimentar, mensagem, token e link personalizado;
-- botão **Novo token**, que invalida o link anterior e gera um novo;
-- edição e exclusão continuam disponíveis no painel;
-- arquivo de migração `migration_v1_2_to_v1_3.sql` para quem já aplicou o banco da v1.2.
+A URL principal do Pages abrirá `index.html`, portanto mostrará diretamente a tela de login.
 
-## Mantido das versões anteriores
+Exemplo:
 
-- login por e-mail e senha com Supabase Auth;
-- recuperação de senha;
-- painel protegido e RLS no banco;
-- múltiplos casamentos por conta;
-- importação em lote com pré-validação;
-- links individuais por token;
-- compartilhamento pelo WhatsApp;
-- RSVP por Edge Function;
-- modo DEMO para testar antes de conectar um Supabase real.
+```text
+https://usuario.github.io/nome-do-repositorio/
+```
 
-## Fluxo final
+Painel:
 
-1. O administrador entra em `admin/login.html`.
-2. Cadastra ou importa **Família Silva — 4 lugares**.
-3. Opcionalmente informa os membros: João, Maria, Pedro e Ana.
-4. O painel gera um token e o link `https://site.com/?convite=TOKEN`.
-5. O convidado abre o link sem login.
-6. Se houver membros cadastrados, o RSVP permite marcar exatamente quem estará presente.
-7. A resposta volta ao painel e entra nas métricas/exportações.
+```text
+https://usuario.github.io/nome-do-repositorio/admin/
+```
 
-O `config.js` do convite continua responsável pelo design e conteúdo. Convidados, membros e respostas ficam no sistema de gestão.
+Convite Nível 3:
+
+```text
+https://usuario.github.io/nome-do-repositorio/convites/nivel-3/
+```
+
+Convite individual:
+
+```text
+https://usuario.github.io/nome-do-repositorio/convites/nivel-3/?convite=SEU_TOKEN
+```
+
+## Configuração do painel
+
+Edite:
+
+```text
+admin/js/config.js
+```
+
+Para testar sem banco:
+
+```js
+mode: "demo"
+```
+
+Para produção com Supabase:
+
+```js
+mode: "supabase"
+supabaseUrl: "https://SEU-PROJETO.supabase.co"
+publishableKey: "SUA_CHAVE_PUBLICAVEL"
+```
+
+A `publishableKey` é destinada ao cliente público. **Nunca coloque `service_role`, secret key, senha do banco ou outros segredos no repositório/front-end.**
+
+## Configuração do convite Nível 3
+
+O conteúdo do casamento continua em:
+
+```text
+convites/nivel-3/js/config.js
+```
+
+A integração com o sistema de convidados também é configurada nesse arquivo, em `guestSystem`.
+
+## Planilha
+
+O modelo oficial fica em:
+
+```text
+modelos/modelo-importacao-convidados.xlsx
+```
+
+O painel já aponta para esse caminho.
+
+## Supabase
+
+Os arquivos de banco e Edge Function ficam em `supabase/`. Antes de colocar em produção, aplique o schema, publique a função `invite-public` e configure autenticação/RLS conforme a documentação do projeto.
+
+## Segurança no Git
+
+O `.gitignore` bloqueia `.env`, chaves privadas, arquivos temporários, configurações de IDE e diretórios locais do Supabase. Mesmo assim, revise sempre um `git diff` ou `git status` antes de fazer commit.
