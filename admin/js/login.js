@@ -1,12 +1,11 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
-
 const CONFIG = window.GUEST_ADMIN_CONFIG || {};
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const isConfigured = () => CONFIG.supabaseUrl && CONFIG.publishableKey && !CONFIG.supabaseUrl.includes("SEU-PROJETO");
 
-function client() {
+async function client() {
   if (!isConfigured()) throw new Error("Configure supabaseUrl e publishableKey em js/config.js antes de usar o login.");
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.116.0");
   return createClient(CONFIG.supabaseUrl, CONFIG.publishableKey);
 }
 
@@ -47,18 +46,24 @@ async function start() {
     $("#loginNotice").textContent = "Senha alterada com sucesso. Entre com sua nova senha.";
     $("#loginNotice").hidden = false;
   }
+  if (params.get("acesso") === "criado") {
+    $("#loginNotice").textContent = "Senha criada com sucesso. Entre para acessar o seu casamento.";
+    $("#loginNotice").hidden = false;
+  }
 
+  const panelUrl = location.pathname.includes("/admin/") ? "index.html" : "admin/index.html";
   if (CONFIG.mode === "demo") {
     $("#demoAccess").hidden = false;
     $("#loginForm").hidden = true;
-    $("#demoButton").addEventListener("click", () => location.href = "admin/index.html");
+    $("#demoButton").addEventListener("click", () => location.href = panelUrl);
+    $("#demoCoupleButton")?.addEventListener("click", () => location.href = `${panelUrl}?perfil=casal`);
     return;
   }
 
-  const supabase = client();
+  const supabase = await client();
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    location.replace("admin/index.html");
+    location.replace(panelUrl);
     return;
   }
 
@@ -85,7 +90,7 @@ async function start() {
       if (error) throw error;
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError || !user) throw userError || new Error("Não foi possível validar a sessão.");
-      location.replace("admin/index.html");
+      location.replace(panelUrl);
     } catch (error) {
       status.textContent = friendlyError(error);
       setBusy(button, false, "Entrar no painel");

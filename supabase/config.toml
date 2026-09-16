@@ -1,0 +1,5 @@
+[functions.invite-public]
+verify_jwt = false
+
+[functions.admin-access]
+verify_jwt = true

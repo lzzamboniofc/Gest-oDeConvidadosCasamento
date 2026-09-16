@@ -1,5 +1,3 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
-
 const CONFIG = window.GUEST_ADMIN_CONFIG || {};
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -22,6 +20,13 @@ function bindPasswordToggles() {
 
 async function start() {
   bindPasswordToggles();
+  const inviteMode = new URLSearchParams(location.search).get("convite_acesso") === "1";
+  if (inviteMode) {
+    if ($("#resetEyebrow")) $("#resetEyebrow").textContent = "Primeiro acesso";
+    if ($("#resetTitle")) $("#resetTitle").textContent = "Crie sua senha";
+    if ($("#resetIntro")) $("#resetIntro").textContent = "Defina uma senha para acessar somente o painel do seu casamento.";
+    if ($("#resetButton")) $("#resetButton").textContent = "Criar senha e continuar";
+  }
   if (CONFIG.mode === "demo") {
     $("#resetForm").hidden = true;
     $("#resetIntro").textContent = "Recuperação de senha está disponível quando o painel estiver conectado ao Supabase.";
@@ -29,6 +34,7 @@ async function start() {
   }
   if (!CONFIG.supabaseUrl || !CONFIG.publishableKey || CONFIG.supabaseUrl.includes("SEU-PROJETO")) throw new Error("Supabase não configurado.");
 
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.116.0");
   const supabase = createClient(CONFIG.supabaseUrl, CONFIG.publishableKey);
   let recoveryDetected = false;
   const { data: listener } = supabase.auth.onAuthStateChange((event) => {
@@ -59,7 +65,8 @@ async function start() {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
       await supabase.auth.signOut({ scope: "local" });
-      location.replace("index.html?senha=alterada");
+      const loginBase = location.pathname.includes("/admin/") ? "../index.html" : "index.html";
+      location.replace(inviteMode ? `${loginBase}?acesso=criado` : `${loginBase}?senha=alterada`);
     } catch (error) {
       status.textContent = friendlyError(error);
       button.disabled = false;

@@ -1,13 +1,17 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.116.0";
-
 const CONFIG = window.GUEST_ADMIN_CONFIG || {};
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
-const state = { weddings: [], invitations: [], weddingId: null, editId: null, user: null, importRows: [] };
+const state = { weddings: [], invitations: [], weddingId: null, editId: null, user: null, profile: null, isAdmin: false, accessMembers: [], importRows: [] };
 const DEMO_KEY = "wedding_guest_manager_demo_v1";
 
 const sample = {
-  weddings: [{ id: "demo-wedding", name: "Liliane & Igor", slug: "liliane-igor", event_date: "2027-04-03", invite_base_url: "../convites/nivel-3/index.html" }],
+  weddings: [
+    { id: "demo-wedding", name: "Liliane & Igor", slug: "liliane-igor", event_date: "2027-04-03", invite_base_url: "../convites/nivel-3/index.html" },
+    { id: "demo-wedding-2", name: "Amanda & Lucas", slug: "amanda-lucas", event_date: "2027-09-18", invite_base_url: "../convites/nivel-3/index.html" }
+  ],
+  accessMembers: [
+    { id: "access-demo-1", wedding_id: "demo-wedding", user_id: "demo-couple", email: "casal@demo.local", display_name: "Liliane e Igor", access_role: "couple" }
+  ],
   invitations: [
     { id: "i1", wedding_id: "demo-wedding", token: "DEMO-FAMILIA-SILVA", display_name: "Família Silva", contact_name: "João Silva", phone: "5515991111111", seats: 4, category: "Família", notes: "", active: true, members: ["João Silva","Maria Silva","Pedro Silva","Ana Silva"], rsvps: [] },
     { id: "i2", wedding_id: "demo-wedding", token: "DEMO-MARIA-SOUZA", display_name: "Maria Souza", contact_name: "Maria Souza", phone: "5515992222222", seats: 1, category: "Amigos", notes: "", active: true, members: ["Maria Souza"], rsvps: [{ attending: true, guest_count: 1, submitted_name: "Maria Souza", guest_names:["Maria Souza"], meal_notes: "", message: "", responded_at: new Date().toISOString(), updated_at: new Date().toISOString() }] },
@@ -16,7 +20,16 @@ const sample = {
 };
 
 const clone = value => JSON.parse(JSON.stringify(value));
-const loadDemo = () => { try { return JSON.parse(localStorage.getItem(DEMO_KEY)) || clone(sample); } catch { return clone(sample); } };
+const loadDemo = () => {
+  try {
+    const data = JSON.parse(localStorage.getItem(DEMO_KEY)) || clone(sample);
+    if (!Array.isArray(data.weddings)) data.weddings = [];
+    if (!Array.isArray(data.invitations)) data.invitations = [];
+    if (!Array.isArray(data.accessMembers)) data.accessMembers = clone(sample.accessMembers);
+    sample.weddings.forEach(w => { if (!data.weddings.some(item => item.id === w.id)) data.weddings.push(clone(w)); });
+    return data;
+  } catch { return clone(sample); }
+};
 const saveDemo = data => localStorage.setItem(DEMO_KEY, JSON.stringify(data));
 const generateToken = (bytes = 24) => {
   const arr = new Uint8Array(bytes); crypto.getRandomValues(arr);
@@ -118,6 +131,7 @@ async function parseGuestWorkbook(file) {
 let supabase = null;
 if (CONFIG.mode === "supabase") {
   if (!CONFIG.supabaseUrl || !CONFIG.publishableKey || CONFIG.supabaseUrl.includes("SEU-PROJETO")) throw new Error("Preencha supabaseUrl e publishableKey em js/config.js");
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2.116.0");
   supabase = createClient(CONFIG.supabaseUrl, CONFIG.publishableKey);
 }
 
@@ -132,17 +146,34 @@ async function syncSupabaseMembers(invitationId, members) {
 
 const backend = {
   async currentUser() {
-    if (CONFIG.mode === "demo") return { id: "demo-user", email: "demo@local" };
+    if (CONFIG.mode === "demo") {
+      const requested = new URLSearchParams(location.search).get("perfil");
+      const demoRole = requested === "casal" ? "couple" : (CONFIG.demoRole || "admin");
+      return { id: demoRole === "admin" ? "demo-user" : "demo-couple", email: demoRole === "admin" ? "admin@demo.local" : "casal@demo.local", demoRole };
+    }
     const { data, error } = await supabase.auth.getUser();
     if (error) return null;
     return data.user || null;
   },
+  async profile(user) {
+    if (!user) return null;
+    if (CONFIG.mode === "demo") return { user_id:user.id, email:user.email, display_name:user.demoRole === "couple" ? "Liliane e Igor" : "Administrador", role:user.demoRole || "admin" };
+    const { data, error } = await supabase.from("profiles").select("user_id,email,display_name,role").eq("user_id", user.id).maybeSingle();
+    if (error) throw error;
+    return data || { user_id:user.id, email:user.email, display_name:user.email, role:"couple" };
+  },
   async logout() { if (CONFIG.mode === "supabase") await supabase.auth.signOut({ scope: "local" }); },
   async weddings() {
-    if (CONFIG.mode === "demo") return loadDemo().weddings;
+    if (CONFIG.mode === "demo") {
+      const d = loadDemo();
+      if (state.isAdmin) return d.weddings;
+      const allowed = new Set((d.accessMembers || []).filter(m => m.user_id === state.user?.id).map(m => m.wedding_id));
+      return d.weddings.filter(w => allowed.has(w.id));
+    }
     const { data, error } = await supabase.from("weddings").select("*").order("created_at"); if (error) throw error; return data;
   },
   async saveWedding(item) {
+    if (!item.id && !state.isAdmin) throw new Error("Somente o administrador pode criar novos casamentos.");
     if (CONFIG.mode === "demo") {
       const d = loadDemo(); const i = d.weddings.findIndex(w => w.id === item.id);
       if (i >= 0) d.weddings[i] = { ...d.weddings[i], ...item }; else d.weddings.push({ ...item, id: crypto.randomUUID() });
@@ -201,6 +232,33 @@ const backend = {
     const membersPayload = [];
     prepared.forEach(({item,token}) => (item.members || []).forEach((name,index) => membersPayload.push({ invitation_id:idByToken.get(token), name, sort_order:index })));
     if (membersPayload.length) { const { error:memberError } = await supabase.from("invitation_members").insert(membersPayload); if (memberError) throw memberError; }
+  },
+  async weddingMembers(weddingId) {
+    if (!state.isAdmin || !weddingId) return [];
+    if (CONFIG.mode === "demo") return (loadDemo().accessMembers || []).filter(m => m.wedding_id === weddingId);
+    const { data, error } = await supabase.from("wedding_members").select("id,wedding_id,user_id,email,display_name,access_role,created_at").eq("wedding_id", weddingId).order("created_at");
+    if (error) throw error;
+    return data || [];
+  },
+  async inviteCouple({ weddingId, email, displayName }) {
+    if (!state.isAdmin) throw new Error("Somente o administrador pode gerenciar acessos.");
+    if (CONFIG.mode === "demo") {
+      const d=loadDemo(); d.accessMembers ||= [];
+      const existing=d.accessMembers.find(m=>m.wedding_id===weddingId && String(m.email).toLowerCase()===String(email).toLowerCase());
+      if (existing) { existing.display_name=displayName || existing.display_name; }
+      else d.accessMembers.push({id:crypto.randomUUID(),wedding_id:weddingId,user_id:crypto.randomUUID(),email,display_name:displayName||email,access_role:"couple",created_at:new Date().toISOString()});
+      saveDemo(d); return;
+    }
+    const redirectTo = new URL(CONFIG.inviteSetupPage || "../reset-password.html?convite_acesso=1", location.href).href;
+    const { data, error } = await supabase.functions.invoke(CONFIG.accessFunctionName || "admin-access", { body: { action:"invite", weddingId, email, displayName, redirectTo } });
+    if (error) throw error;
+    if (data?.error) throw new Error(data.error);
+  },
+  async removeWeddingMember(id) {
+    if (!state.isAdmin) throw new Error("Somente o administrador pode remover acessos.");
+    if (CONFIG.mode === "demo") { const d=loadDemo(); d.accessMembers=(d.accessMembers||[]).filter(m=>m.id!==id); saveDemo(d); return; }
+    const { error } = await supabase.from("wedding_members").delete().eq("id", id);
+    if (error) throw error;
   }
 };
 
@@ -215,6 +273,7 @@ async function refreshAll(preferredId = state.weddingId) {
   state.weddingId = state.weddings.some(w => w.id === preferredId) ? preferredId : state.weddings[0]?.id || null;
   renderWeddingSelect();
   if (state.weddingId) state.invitations = await backend.invitations(state.weddingId); else state.invitations = [];
+  state.accessMembers = state.isAdmin && state.weddingId ? await backend.weddingMembers(state.weddingId) : [];
   renderAll();
 }
 
@@ -238,8 +297,8 @@ function rowHtml(inv, compact=false) {
   const status = statusOf(inv); const r = rsvpOf(inv); const confirmed = status === "confirmed" ? r?.guest_count ?? 0 : "—";
   const memberCount = membersOf(inv).length;
   const memberMeta = memberCount ? `${memberCount} membro${memberCount === 1 ? "" : "s"}` : "sem membros individuais";
-  if (compact) return `<tr><td class="guest-name"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td>${inv.seats}</td><td>${confirmed}</td><td><span class="status status--${status}">${statusLabel(status)}</span></td><td><button class="mini-btn" data-copy="${inv.id}">Copiar link</button></td></tr>`;
-  return `<tr><td class="guest-name"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td><span>${escapeHtml(inv.contact_name || "—")}</span><br><small class="muted">${escapeHtml(inv.phone || "")}</small></td><td>${inv.seats}</td><td>${confirmed}</td><td><span class="status status--${status}">${statusLabel(status)}</span></td><td><div class="row-actions"><button class="mini-btn" title="Copiar link" data-copy="${inv.id}">Link</button><button class="mini-btn" title="Enviar pelo WhatsApp" data-whatsapp="${inv.id}">WhatsApp</button><button class="mini-btn" title="Editar convite" data-edit="${inv.id}">Editar</button><button class="mini-btn" title="Invalidar o link antigo e gerar outro" data-regenerate="${inv.id}">Novo token</button><button class="mini-btn mini-btn--danger" title="Excluir" data-delete="${inv.id}">×</button></div></td></tr>`;
+  if (compact) return `<tr><td class="guest-name" data-label="Convite"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Resposta">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><button class="mini-btn" data-copy="${inv.id}">Copiar link</button></td></tr>`;
+  return `<tr><td class="guest-name" data-label="Convidado / família"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Contato"><span>${escapeHtml(inv.contact_name || "—")}</span><br><small class="muted">${escapeHtml(inv.phone || "")}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Confirmados">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><div class="row-actions"><button class="mini-btn" title="Copiar link" data-copy="${inv.id}">Link</button><button class="mini-btn" title="Enviar pelo WhatsApp" data-whatsapp="${inv.id}">WhatsApp</button><button class="mini-btn" title="Editar convite" data-edit="${inv.id}">Editar</button><button class="mini-btn" title="Invalidar o link antigo e gerar outro" data-regenerate="${inv.id}">Novo token</button><button class="mini-btn mini-btn--danger" title="Excluir" data-delete="${inv.id}">Excluir</button></div></td></tr>`;
 }
 function filteredInvitations() {
   const q = $("#searchInput").value.trim().toLowerCase(); const filter = $("#statusFilter").value;
@@ -258,9 +317,23 @@ function renderSettings() {
   const w = currentWedding(); const f = $("#weddingForm");
   for (const name of ["name","slug","event_date","invite_base_url"]) f.elements[name].value = w?.[name] || "";
 }
-function renderAll(){ renderStats(); renderTables(); renderSettings(); }
+function renderAccess() {
+  const list = $("#accessRows"); if (!list) return;
+  if (!state.isAdmin) { list.innerHTML = ""; return; }
+  list.innerHTML = state.accessMembers.map(member => `<article class="access-card"><div class="access-card__identity"><strong>${escapeHtml(member.display_name || member.email || "Casal")}</strong><small>${escapeHtml(member.email || "")}</small><span class="access-card__role">Casal</span></div><button class="mini-btn mini-btn--danger" type="button" data-remove-access="${member.id}">Remover acesso</button></article>`).join("");
+  $("#accessEmpty").hidden = state.accessMembers.length > 0;
+}
+function applyPermissions() {
+  $$('[data-admin-only]').forEach(el => el.hidden = !state.isAdmin);
+  const roleText = state.isAdmin ? "Administrador" : "Casal";
+  $("#userMode").textContent = `${roleText} · acesso autenticado`;
+  $("#modeBadge").textContent = CONFIG.mode === "demo" ? `DEMO · ${roleText.toUpperCase()}` : roleText.toUpperCase();
+  if (!state.isAdmin && $("#view-access")?.classList.contains("is-active")) showView("dashboard");
+}
+function renderAll(){ renderStats(); renderTables(); renderSettings(); renderAccess(); applyPermissions(); }
 
 function openInvite(id=null) {
+  if (!state.weddingId) return toast("Nenhum casamento disponível para esta conta.");
   state.editId = id; const form = $("#inviteForm"); form.reset(); form.elements.seats.value = 1; form.elements.id.value = id || "";
   $("#inviteDialogTitle").textContent = id ? "Editar convite" : "Adicionar convidado";
   if (id) {
@@ -292,7 +365,7 @@ function renderImportReview(result){
   $("#importErrorsWrap").hidden = result.errors.length === 0;
   $("#importErrors").innerHTML = result.errors.slice(0, 20).map(e => `<li>${escapeHtml(e)}</li>`).join("") + (result.errors.length > 20 ? `<li>... e mais ${result.errors.length - 20} erro(s).</li>` : "");
   $("#importPreviewWrap").hidden = result.valid.length === 0;
-  $("#importPreviewRows").innerHTML = result.valid.slice(0,8).map(i => `<tr><td>${escapeHtml(i.display_name)}</td><td>${escapeHtml(i.contact_name || "—")}</td><td>${escapeHtml(i.phone || "—")}</td><td>${i.seats}</td><td>${escapeHtml(i.members?.join("; ") || "—")}</td><td>${escapeHtml(i.category || "—")}</td></tr>`).join("");
+  $("#importPreviewRows").innerHTML = result.valid.slice(0,8).map(i => `<tr><td class="guest-name" data-label="Convite">${escapeHtml(i.display_name)}</td><td data-label="Responsável">${escapeHtml(i.contact_name || "—")}</td><td data-label="WhatsApp">${escapeHtml(i.phone || "—")}</td><td data-label="Lugares">${i.seats}</td><td data-label="Membros">${escapeHtml(i.members?.join("; ") || "—")}</td><td data-label="Categoria">${escapeHtml(i.category || "—")}</td></tr>`).join("");
   $("#confirmImportButton").disabled = result.valid.length === 0 || result.errors.length > 0;
   $("#importStatus").textContent = result.errors.length ? "Corrija os erros na planilha e selecione o arquivo novamente." : (result.valid.length ? `Planilha validada: ${result.valid.length} convite(s) pronto(s) para importar.` : "Nenhum convidado válido encontrado.");
 }
@@ -379,8 +452,17 @@ function bindActions(){
   $$('[data-close-import]').forEach(b=>b.addEventListener("click",closeImport));
   $$('[data-close-dialog]').forEach(b=>b.addEventListener("click",closeInvite));
   $$('[data-close-wedding]').forEach(b=>b.addEventListener("click",()=>$("#weddingDialog").close()));
-  $("#weddingSelect").addEventListener("change",async e=>{state.weddingId=e.target.value;state.invitations=await backend.invitations(state.weddingId);renderAll()});
+  $("#weddingSelect").addEventListener("change",async e=>{await refreshAll(e.target.value)});
   $("#searchInput").addEventListener("input",renderTables); $("#statusFilter").addEventListener("change",renderTables);
+  $("#accessForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!state.isAdmin || !state.weddingId) return;
+    const form=e.currentTarget; const status=$("#accessStatus"); const button=$("#inviteCoupleButton");
+    const data=Object.fromEntries(new FormData(form).entries());
+    try { button.disabled=true; status.textContent="Enviando convite..."; await backend.inviteCouple({weddingId:state.weddingId,email:String(data.email||"").trim(),displayName:String(data.display_name||"").trim()}); form.reset(); await refreshAll(state.weddingId); status.textContent="Acesso criado. Se for uma nova conta, o convite foi enviado por e-mail."; status.classList.add("form-status--success"); }
+    catch(err){ status.classList.remove("form-status--success"); status.textContent=err.message||"Não foi possível criar o acesso."; }
+    finally { button.disabled=false; }
+  });
   document.addEventListener("click",async e=>{
     const b=e.target.closest("button"); if(!b)return;
     try {
@@ -388,6 +470,7 @@ function bindActions(){
       if(b.dataset.whatsapp) whatsapp(b.dataset.whatsapp);
       if(b.dataset.edit) openInvite(b.dataset.edit);
       if(b.dataset.regenerate) await regenerateToken(b.dataset.regenerate);
+      if(b.dataset.removeAccess && confirm("Remover o acesso desta pessoa ao casamento?")){await backend.removeWeddingMember(b.dataset.removeAccess);await refreshAll(state.weddingId);toast("Acesso removido.");}
       if(b.dataset.delete && confirm("Excluir este convite? Todos os membros e o RSVP vinculados também serão excluídos.")){await backend.deleteInvitation(b.dataset.delete);await refreshAll(state.weddingId);toast("Convite excluído.");}
     } catch(err){toast(err.message||"Ocorreu um erro.");}
   });
@@ -408,8 +491,11 @@ async function start(){
   bindActions();
   state.user = await backend.currentUser();
   if (CONFIG.mode === "supabase" && !state.user) { location.replace(CONFIG.loginPage || "../index.html"); return; }
-  const email = state.user?.email || "Administrador";
-  $("#userEmail").textContent = email; $("#userInitial").textContent = email.slice(0,1).toUpperCase(); $("#userMode").textContent = CONFIG.mode === "demo" ? "Modo demonstração" : "Acesso autenticado";
+  state.profile = await backend.profile(state.user);
+  state.isAdmin = state.profile?.role === "admin";
+  const email = state.user?.email || state.profile?.email || "Usuário";
+  $("#userEmail").textContent = state.profile?.display_name || email; $("#userInitial").textContent = (state.profile?.display_name || email).slice(0,1).toUpperCase();
+  applyPermissions();
   $("#authGuard").hidden = true; $("#app").hidden = false; await refreshAll();
   if (CONFIG.mode === "supabase") supabase.auth.onAuthStateChange((event) => { if (event === "SIGNED_OUT") location.replace(CONFIG.loginPage || "../index.html"); });
 }

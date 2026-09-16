@@ -25,6 +25,7 @@
         <button class="nav-item is-active" data-view="dashboard">Visão geral</button>
         <button class="nav-item" data-view="guests">Convidados</button>
         <button class="nav-item" data-view="settings">Casamento</button>
+        <button class="nav-item" data-view="access" data-admin-only>Acessos</button>
       </nav>
       <div class="sidebar__bottom sidebar__bottom--account">
         <div class="account-chip">
@@ -45,7 +46,7 @@
           <span class="eyebrow">Casamento selecionado</span>
           <select id="weddingSelect" aria-label="Selecionar casamento"></select>
         </div>
-        <button class="btn btn--secondary" id="newWeddingButton" type="button">+ Novo casamento</button>
+        <button class="btn btn--secondary" id="newWeddingButton" data-admin-only type="button">+ Novo casamento</button>
       </header>
 
       <section class="view is-active" id="view-dashboard">
@@ -65,7 +66,7 @@
 
         <div class="panel">
           <div class="panel__head"><div><span class="eyebrow">Últimos registros</span><h2>Convites</h2></div><button class="text-button" data-go-guests type="button">Ver todos →</button></div>
-          <div class="table-wrap"><table><thead><tr><th>Convite</th><th>Lugares</th><th>Resposta</th><th>Status</th><th></th></tr></thead><tbody id="dashboardRows"></tbody></table></div>
+          <div class="table-wrap table-wrap--responsive"><table class="responsive-data-table"><thead><tr><th>Convite</th><th>Lugares</th><th>Resposta</th><th>Status</th><th>Ações</th></tr></thead><tbody id="dashboardRows"></tbody></table></div>
         </div>
       </section>
 
@@ -84,7 +85,7 @@
           <select id="statusFilter"><option value="all">Todos os status</option><option value="pending">Pendentes</option><option value="confirmed">Confirmados</option><option value="declined">Não irão</option></select>
         </div>
         <div class="panel panel--flush">
-          <div class="table-wrap"><table><thead><tr><th>Convidado / família</th><th>Contato</th><th>Lugares</th><th>Confirmados</th><th>Status</th><th>Ações</th></tr></thead><tbody id="guestRows"></tbody></table></div>
+          <div class="table-wrap table-wrap--responsive"><table class="responsive-data-table"><thead><tr><th>Convidado / família</th><th>Contato</th><th>Lugares</th><th>Confirmados</th><th>Status</th><th>Ações</th></tr></thead><tbody id="guestRows"></tbody></table></div>
           <div class="empty" id="guestEmpty" hidden>Nenhum convite encontrado.</div>
         </div>
       </section>
@@ -100,6 +101,30 @@
           </div>
           <div class="form-actions"><button class="btn btn--primary" type="submit">Salvar alterações</button></div>
         </form>
+      </section>
+
+      <section class="view" id="view-access" data-admin-only>
+        <div class="page-heading">
+          <div><span class="eyebrow">Permissões</span><h1>Acessos do casal</h1></div>
+        </div>
+        <div class="access-grid">
+          <form class="panel access-form" id="accessForm">
+            <span class="eyebrow">Adicionar acesso</span>
+            <h2>Convidar o casal</h2>
+            <p class="muted access-copy">A pessoa receberá um e-mail para criar a senha. Depois do login, verá somente o casamento selecionado acima.</p>
+            <div class="form-stack">
+              <label><span>Nome</span><input name="display_name" placeholder="Liliane e Igor"></label>
+              <label><span>E-mail</span><input name="email" type="email" required autocomplete="email" placeholder="casal@exemplo.com"></label>
+              <button class="btn btn--primary" id="inviteCoupleButton" type="submit">Enviar convite de acesso</button>
+              <p class="form-status" id="accessStatus" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+          <div class="panel access-list-panel">
+            <div class="panel__head"><div><span class="eyebrow">Vinculados</span><h2>Quem pode acessar</h2></div></div>
+            <div class="access-list" id="accessRows"></div>
+            <div class="empty" id="accessEmpty" hidden>Nenhum acesso do casal vinculado a este casamento.</div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
@@ -157,8 +182,8 @@
 
         <div id="importPreviewWrap" hidden>
           <h3>Prévia</h3>
-          <div class="table-wrap import-preview">
-            <table>
+          <div class="table-wrap table-wrap--responsive import-preview">
+            <table class="responsive-data-table">
               <thead><tr><th>Convite</th><th>Responsável</th><th>WhatsApp</th><th>Lugares</th><th>Membros</th><th>Categoria</th></tr></thead>
               <tbody id="importPreviewRows"></tbody>
             </table>

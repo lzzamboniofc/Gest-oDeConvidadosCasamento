@@ -10,14 +10,16 @@
 
   MODO SUPABASE:
   1. aplique supabase/schema.sql;
-  2. publique a Edge Function invite-public;
-  3. preencha supabaseUrl + publishableKey;
-  4. troque mode para "supabase".
+  2. publique as Edge Functions invite-public e admin-access;
+  3. crie o perfil do primeiro administrador em public.profiles;
+  4. preencha supabaseUrl + publishableKey;
+  5. troque mode para "supabase".
 
   NUNCA coloque secret key / service_role neste arquivo.
 */
 window.GUEST_ADMIN_CONFIG = {
   mode: "demo", // "demo" ou "supabase"
+  demoRole: "admin", // em DEMO: "admin" ou "couple" (também aceita ?perfil=casal)
 
   supabaseUrl: "https://SEU-PROJETO.supabase.co",
   publishableKey: "SUA_CHAVE_PUBLICAVEL",
@@ -33,6 +35,10 @@ window.GUEST_ADMIN_CONFIG = {
   // Autenticação administrativa.
   loginPage: "../index.html",
   passwordResetPage: "reset-password.html",
+
+  // v1.5 — gestão de acessos do casal.
+  accessFunctionName: "admin-access",
+  inviteSetupPage: "../reset-password.html?convite_acesso=1",
 
   // Apenas apresentação do painel.
   brandName: "Gestão de Convidados"

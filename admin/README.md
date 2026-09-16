@@ -1,7 +1,10 @@
-# Painel administrativo
+# Painel v1.5
 
-- `index.html`: painel protegido.
-- `js/config.js`: configuração principal do painel.
-- o login fica na raiz do repositório (`../index.html`).
+O mesmo painel atende dois perfis:
 
-No modo Supabase, tentar acessar `/admin/` sem sessão redireciona para o login da raiz.
+- **Administrador:** todos os casamentos, criação de projetos e gestão de acessos;
+- **Casal:** apenas casamento(s) vinculados, convidados, importação/exportação e RSVP.
+
+A distinção de dados é feita no Supabase por RLS. O JavaScript apenas adapta a interface aos privilégios já determinados pelo banco.
+
+No mobile, as tabelas principais são convertidas para cards automaticamente.
