@@ -105,3 +105,8 @@ ConviteCasamento-Nivel3/
 └── assets/
     └── images/
 ```
+
+
+## Mini player de música (v1.8)
+
+O convite possui um player discreto sem autoplay. Configure em `js/config.js` no bloco `music`. O arquivo padrão fica em `assets/audio/musica.mp3`. Para trocar a trilha, substitua o arquivo ou altere `music.file`.

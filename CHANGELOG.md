@@ -62,3 +62,11 @@
 - Remoção do botão “Compartilhar convite”.
 - Botão “Atualizar” no painel administrativo para buscar RSVP e demais dados novamente.
 - Correção de caminhos de imagens dinâmicas no GitHub Pages usando URLs absolutas resolvidas a partir do documento.
+
+
+## v1.8 — Mini player de música
+- Música opcional no convite Nível 3 sem reprodução automática.
+- Mini player em vidro fosco, discreto e responsivo.
+- Ícones de play/pause, disco giratório e equalizador animado enquanto toca.
+- Layout maior no desktop e compacto no mobile.
+- Volume configurável em `convites/nivel-3/js/config.js`.

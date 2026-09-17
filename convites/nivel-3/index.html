@@ -230,6 +230,23 @@
     <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" type="button" aria-label="Próxima foto">→</button>
   </div>
 
+  <div class="music-player" id="musicPlayer" hidden>
+    <button class="music-player__button" id="musicToggle" type="button" aria-label="Tocar música" aria-pressed="false">
+      <span class="music-player__disc" aria-hidden="true">
+        <span class="music-player__disc-core"></span>
+        <span class="music-player__control-icon"></span>
+      </span>
+      <span class="music-player__copy">
+        <strong>Trilha sonora</strong>
+        <small id="musicStatus">Tocar música</small>
+      </span>
+      <span class="music-player__equalizer" aria-hidden="true">
+        <i></i><i></i><i></i><i></i>
+      </span>
+    </button>
+    <audio id="backgroundMusic" preload="metadata" loop></audio>
+  </div>
+
   <button class="back-top" id="backTop" type="button" aria-label="Voltar ao topo">↑</button>
 
   <script src="js/config.js"></script>

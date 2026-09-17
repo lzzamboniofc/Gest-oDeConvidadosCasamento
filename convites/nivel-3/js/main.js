@@ -70,10 +70,18 @@
   const opening = document.getElementById('opening');
   const openButton = document.getElementById('openInvitation');
   const header = document.getElementById('siteHeader');
+  const musicPlayer = document.getElementById('musicPlayer');
+  const musicToggle = document.getElementById('musicToggle');
+  const backgroundMusic = document.getElementById('backgroundMusic');
+  const musicStatus = document.getElementById('musicStatus');
+  const revealMusicPlayer = () => {
+    if (C.music?.enabled && C.music?.file && musicPlayer) musicPlayer.hidden = false;
+  };
   const openSite = () => {
     opening?.setAttribute('hidden', '');
     document.body.classList.remove('is-locked');
     header?.classList.add('is-visible');
+    revealMusicPlayer();
   };
   if (C.opening?.enabled === false) openSite();
   else openButton?.addEventListener('click', openSite);
@@ -333,6 +341,47 @@
     }, 120);
   });
 
+
+  const syncMusicPlayer = () => {
+    if (!musicToggle || !backgroundMusic) return;
+    const playing = !backgroundMusic.paused && !backgroundMusic.ended;
+    musicToggle.classList.toggle('is-playing', playing);
+    musicToggle.setAttribute('aria-pressed', String(playing));
+    const label = playing ? (C.music?.labelPause || 'Pausar música') : (C.music?.labelPlay || 'Tocar música');
+    musicToggle.setAttribute('aria-label', label);
+    if (musicStatus) musicStatus.textContent = label;
+  };
+
+  if (C.music?.enabled && C.music?.file && backgroundMusic && musicToggle) {
+    backgroundMusic.src = C.music.file;
+    const requestedVolume = Number(C.music.volume);
+    backgroundMusic.volume = Number.isFinite(requestedVolume) ? Math.min(1, Math.max(0, requestedVolume)) : 0.55;
+    musicToggle.addEventListener('click', async () => {
+      if (backgroundMusic.paused || backgroundMusic.ended) {
+        try {
+          await backgroundMusic.play();
+        } catch (error) {
+          console.warn('Não foi possível iniciar a música:', error);
+          if (musicStatus) musicStatus.textContent = 'Toque novamente';
+        }
+      } else {
+        backgroundMusic.pause();
+      }
+      syncMusicPlayer();
+    });
+    backgroundMusic.addEventListener('play', syncMusicPlayer);
+    backgroundMusic.addEventListener('pause', syncMusicPlayer);
+    backgroundMusic.addEventListener('ended', syncMusicPlayer);
+    backgroundMusic.addEventListener('error', () => {
+      musicToggle.disabled = true;
+      musicToggle.classList.add('is-error');
+      musicToggle.setAttribute('aria-label', 'Música indisponível');
+      if (musicStatus) musicStatus.textContent = 'Música indisponível';
+    });
+    syncMusicPlayer();
+  } else {
+    musicPlayer?.remove();
+  }
 
   const backTop = document.getElementById('backTop');
   const onScroll = () => backTop?.classList.toggle('is-visible', scrollY > innerHeight * .75);

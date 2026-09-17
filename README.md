@@ -1,6 +1,10 @@
-# Sistema de Convidados + Convites de Casamento — v1.5
+# Sistema de Convidados + Convites de Casamento — v1.8
 
 Estrutura preparada para versionamento no GitHub, publicação no **GitHub Pages** e uso com dois perfis de acesso: **Administrador** e **Casal**.
+
+## O que mudou na v1.8
+
+O convite Nível 3 agora possui **mini player de música sem autoplay**, com visual em vidro fosco, play/pause, disco giratório e equalizador discreto. O componente é maior no desktop e compacto no mobile. A trilha pode ser trocada em `convites/nivel-3/assets/audio/` e configurada em `convites/nivel-3/js/config.js`.
 
 ## O que mudou na v1.5
 

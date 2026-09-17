@@ -12,7 +12,7 @@
   - história, programação, galeria, dress code e FAQ;
   - RSVP por WhatsApp ou formulário externo;
   - calendário e compartilhamento;
-  - sem lista de presentes, PIX, música ou painel administrativo.
+  - sem lista de presentes ou PIX; com música opcional e integração ao painel de convidados.
 */
 
 window.WEDDING_THEMES = {
@@ -245,8 +245,16 @@ window.WEDDING_CONFIG = {
     baseMessage: "Olá! Estou respondendo ao convite de casamento de Liliane e Igor."
   },
 
-  sharing: {
+  music: {
     enabled: true,
+    file: "assets/audio/musica.mp3",
+    volume: 0.55,
+    labelPlay: "Tocar música",
+    labelPause: "Pausar música"
+  },
+
+  sharing: {
+    enabled: false,
     title: "Convite de casamento — Liliane & Igor",
     text: "Você é nosso convidado para celebrar este dia com a gente."
   },
