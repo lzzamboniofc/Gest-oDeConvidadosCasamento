@@ -31,7 +31,7 @@ Deno.serve(async (req: Request) => {
     if (!token || token.length < 20) return json(req, { error: "Convite inválido" }, 400);
 
     const { data: invitation, error } = await db.from("invitations")
-      .select("id,display_name,seats,active,wedding_id,weddings(name,event_date),invitation_members(name,sort_order),rsvps(attending,guest_count,submitted_name,guest_names,meal_notes,message,responded_at)")
+      .select("id,display_name,seats,active,wedding_id,weddings(name,event_date),invitation_members(name,sort_order),rsvps(attending,guest_count,submitted_name,guest_names,message,responded_at)")
       .eq("token", token).maybeSingle();
     if (error) throw error;
     if (!invitation || !invitation.active) return json(req, { error: "Convite não encontrado" }, 404);
@@ -55,7 +55,6 @@ Deno.serve(async (req: Request) => {
             guestCount: existing.guest_count,
             submittedName: existing.submitted_name || "",
             guestNames: existing.guest_names || [],
-            mealNotes: existing.meal_notes || "",
             message: existing.message || "",
             respondedAt: existing.responded_at
           } : null
@@ -78,7 +77,6 @@ Deno.serve(async (req: Request) => {
         guest_count: count,
         submitted_name: cleanText(body.submittedName, 160),
         guest_names: guestNames,
-        meal_notes: cleanText(body.mealNotes, 500),
         message: cleanText(body.message, 1200),
         responded_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

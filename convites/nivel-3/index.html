@@ -25,6 +25,7 @@
     <div class="opening__content">
       <span class="opening__monogram" data-text="couple.initials"></span>
       <p class="eyebrow eyebrow--light" data-text="opening.eyebrow"></p>
+      <p class="opening__guest-label" id="personalGreetingLabel"></p>
       <p class="opening__guest" id="personalGreeting"></p>
       <h1 data-text="opening.title"></h1>
       <p class="opening__hint" data-text="opening.hint"></p>
@@ -54,6 +55,7 @@
         <p class="eyebrow eyebrow--light" data-text="hero.eyebrow"></p>
         <h1><span data-text="couple.firstName"></span><i>&</i><span data-text="couple.secondName"></span></h1>
         <p class="hero__subtitle" data-text="hero.subtitle"></p>
+        <p class="hero__guest-badge" id="heroGuestBadge" hidden></p>
         <div class="hero__date">
           <span data-text="wedding.weekday"></span>
           <strong data-text="wedding.day"></strong>
@@ -191,7 +193,6 @@
               <p>Selecione as pessoas deste convite que irão ao casamento.</p>
               <div class="rsvp-members__list" id="rsvpMemberOptions"></div>
             </div>
-            <label id="mealField"><span>Preferência / restrição alimentar</span><input type="text" name="alimentacao" placeholder="Opcional"></label>
             <label><span>Mensagem para os noivos</span><textarea name="mensagem" rows="3" placeholder="Opcional"></textarea></label>
             <button class="button button--primary button--wide" type="submit" data-text="rsvp.buttonLabel"></button>
             <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>

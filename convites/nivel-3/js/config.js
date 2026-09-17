@@ -95,11 +95,14 @@ window.WEDDING_CONFIG = {
     hint: "Um capítulo importante da nossa história está prestes a começar.",
     buttonLabel: "Abrir convite",
     guestQueryParam: "convidado",
-    guestPrefix: "Preparamos este convite especialmente para"
+    guestPrefix: "Convite destinado a"
   },
 
   hero: {
-    image: "assets/images/hero.jpg",
+    image: {
+      desktop: "assets/images/hero.jpg",
+      mobile: "assets/images/hero.jpg"
+    },
     eyebrow: "Save the date",
     subtitle: "Uma celebração de amor, encontros e novos começos.",
     primaryButton: "Confirmar presença",
@@ -116,7 +119,10 @@ window.WEDDING_CONFIG = {
     enabled: true,
     eyebrow: "Nossa história",
     title: "O acaso virou escolha. A escolha virou casa.",
-    image: "assets/images/story.jpg",
+    image: {
+      desktop: "assets/images/story.jpg",
+      mobile: "assets/images/story.jpg"
+    },
     year: "desde 2023",
     paragraphs: [
       "Tudo começou sem grandes planos: uma conversa que durou mais do que deveria, um café que virou jantar e a sensação de que o tempo passava diferente quando estávamos juntos.",
@@ -132,7 +138,11 @@ window.WEDDING_CONFIG = {
       venue: "Paróquia São Luís Gonzaga",
       address: "R. Leonardo Piunti, 475 — São Luiz, Itu — SP",
       mapsUrl: "https://maps.app.goo.gl/cBcnP7PYY2Ed3Zdf9",
-      mapsLabel: "Abrir no mapa"
+      mapsLabel: "Abrir no mapa",
+      image: {
+        desktop: "assets/images/story.jpg",
+        mobile: "assets/images/story.jpg"
+      }
     },
     {
       label: "Recepção",
@@ -140,7 +150,11 @@ window.WEDDING_CONFIG = {
       venue: "Paróquia São Luís Gonzaga",
       address: "R. Leonardo Piunti, 475 — São Luiz, Itu — SP",
       mapsUrl: "https://maps.app.goo.gl/cBcnP7PYY2Ed3Zdf9",
-      mapsLabel: "Como chegar"
+      mapsLabel: "Como chegar",
+      image: {
+        desktop: "assets/images/gallery-4.jpg",
+        mobile: "assets/images/gallery-4.jpg"
+      }
     }
   ],
 
@@ -149,12 +163,16 @@ window.WEDDING_CONFIG = {
     eyebrow: "Programação",
     title: "O roteiro do nosso dia",
     note: "Os horários podem receber pequenos ajustes conforme o andamento da celebração.",
+    backgroundImage: {
+      desktop: "assets/images/gallery-2.jpg",
+      mobile: "assets/images/gallery-2.jpg"
+    },
     items: [
-      { time: "16:30", title: "Boas-vindas", text: "Chegue com calma e encontre seu lugar." },
-      { time: "17:00", title: "Cerimônia", text: "O momento do nosso sim." },
-      { time: "19:00", title: "Recepção", text: "Brindes, encontros e celebração." },
-      { time: "20:30", title: "Jantar", text: "Um momento preparado para compartilhar à mesa." },
-      { time: "21:00", title: "Pista aberta", text: "Hora de comemorar sem pressa." }
+      { time: "16:30", title: "Boas-vindas", text: "Chegue com calma e encontre seu lugar.", image: { desktop: "assets/images/gallery-1.jpg", mobile: "assets/images/gallery-1.jpg" } },
+      { time: "17:00", title: "Cerimônia", text: "O momento do nosso sim.", image: { desktop: "assets/images/story.jpg", mobile: "assets/images/story.jpg" } },
+      { time: "19:00", title: "Recepção", text: "Brindes, encontros e celebração.", image: { desktop: "assets/images/gallery-4.jpg", mobile: "assets/images/gallery-4.jpg" } },
+      { time: "20:30", title: "Jantar", text: "Um momento preparado para compartilhar à mesa.", image: { desktop: "assets/images/gallery-5.jpg", mobile: "assets/images/gallery-5.jpg" } },
+      { time: "21:00", title: "Pista aberta", text: "Hora de comemorar sem pressa.", image: { desktop: "assets/images/gallery-3.jpg", mobile: "assets/images/gallery-3.jpg" } }
     ]
   },
 
@@ -222,7 +240,6 @@ window.WEDDING_CONFIG = {
     formAction: "",
     successMessage: "Obrigada! Sua confirmação foi recebida.",
 
-    collectMealPreference: true,
     maxGuestsDefault: 4,
     guestLimitQueryParam: "lugares",
     baseMessage: "Olá! Estou respondendo ao convite de casamento de Liliane e Igor."
@@ -254,7 +271,10 @@ window.WEDDING_CONFIG = {
   },
 
   images: {
-    rsvp: "assets/images/rsvp.jpg"
+    rsvp: {
+      desktop: "assets/images/rsvp.jpg",
+      mobile: "assets/images/rsvp.jpg"
+    }
   },
 
   footer: {

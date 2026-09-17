@@ -40,7 +40,7 @@
   async function submit(config, context, payload) {
     if (!config?.enabled || !context?.token) throw new Error("Convite individual não identificado.");
     if (config.mode === "demo") {
-      const record = { attending:payload.attending, guest_count:payload.guestCount, submitted_name:payload.submittedName, guest_names:payload.guestNames || [], meal_notes:payload.mealNotes, message:payload.message, responded_at:new Date().toISOString(), updated_at:new Date().toISOString() };
+      const record = { attending:payload.attending, guest_count:payload.guestCount, submitted_name:payload.submittedName, guest_names:payload.guestNames || [], message:payload.message, responded_at:new Date().toISOString(), updated_at:new Date().toISOString() };
       const r = JSON.parse(localStorage.getItem(demoRsvpKey) || "{}"); r[context.token] = record; localStorage.setItem(demoRsvpKey, JSON.stringify(r));
       try { const d=JSON.parse(localStorage.getItem(demoKey)); const inv=d?.invitations?.find(i=>i.token===context.token); if(inv){inv.rsvps=[record];localStorage.setItem(demoKey,JSON.stringify(d));} } catch {}
       return { ok:true, message:"Confirmação salva no modo demonstração." };

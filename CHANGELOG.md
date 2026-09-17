@@ -46,3 +46,11 @@
 ## v1.0
 
 - painel inicial de gestão de convidados.
+
+
+## v1.6 — Ajustes do convite
+- Destaque maior para o nome do convidado na abertura e no hero.
+- Remoção do campo de restrição alimentar do RSVP e da estrutura de dados associada.
+- Cards “Onde & quando” com divisão visual entre fundo sólido e imagem do local.
+- Seção de roteiro com troca de imagem de fundo ao passar o mouse sobre cada item.
+- Suporte a imagens responsivas por seção usando objetos desktop/mobile no config.js.

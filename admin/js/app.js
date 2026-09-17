@@ -14,8 +14,8 @@ const sample = {
   ],
   invitations: [
     { id: "i1", wedding_id: "demo-wedding", token: "DEMO-FAMILIA-SILVA", display_name: "Família Silva", contact_name: "João Silva", phone: "5515991111111", seats: 4, category: "Família", notes: "", active: true, members: ["João Silva","Maria Silva","Pedro Silva","Ana Silva"], rsvps: [] },
-    { id: "i2", wedding_id: "demo-wedding", token: "DEMO-MARIA-SOUZA", display_name: "Maria Souza", contact_name: "Maria Souza", phone: "5515992222222", seats: 1, category: "Amigos", notes: "", active: true, members: ["Maria Souza"], rsvps: [{ attending: true, guest_count: 1, submitted_name: "Maria Souza", guest_names:["Maria Souza"], meal_notes: "", message: "", responded_at: new Date().toISOString(), updated_at: new Date().toISOString() }] },
-    { id: "i3", wedding_id: "demo-wedding", token: "DEMO-PEDRO-ANA", display_name: "Pedro & Ana", contact_name: "Pedro Costa", phone: "5515993333333", seats: 2, category: "Amigos", notes: "", active: true, members: ["Pedro Costa","Ana Costa"], rsvps: [{ attending: false, guest_count: 0, submitted_name: "Pedro Costa", guest_names:[], meal_notes: "", message: "", responded_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
+    { id: "i2", wedding_id: "demo-wedding", token: "DEMO-MARIA-SOUZA", display_name: "Maria Souza", contact_name: "Maria Souza", phone: "5515992222222", seats: 1, category: "Amigos", notes: "", active: true, members: ["Maria Souza"], rsvps: [{ attending: true, guest_count: 1, submitted_name: "Maria Souza", guest_names:["Maria Souza"], message: "", responded_at: new Date().toISOString(), updated_at: new Date().toISOString() }] },
+    { id: "i3", wedding_id: "demo-wedding", token: "DEMO-PEDRO-ANA", display_name: "Pedro & Ana", contact_name: "Pedro Costa", phone: "5515993333333", seats: 2, category: "Amigos", notes: "", active: true, members: ["Pedro Costa","Ana Costa"], rsvps: [{ attending: false, guest_count: 0, submitted_name: "Pedro Costa", guest_names:[], message: "", responded_at: new Date().toISOString(), updated_at: new Date().toISOString() }] }
   ]
 };
 
@@ -397,7 +397,6 @@ function exportDataRows() {
       "Status": statusLabel(status),
       "Confirmados": status === "confirmed" ? Number(r?.guest_count ?? r?.guestCount ?? 0) : 0,
       "Nomes confirmados": guestNames.join("; "),
-      "Restrição alimentar": r?.meal_notes ?? r?.mealNotes ?? "",
       "Mensagem": r?.message || "",
       "Respondido em": formatDateTime(r?.responded_at ?? r?.respondedAt ?? ""),
       "Token": inv.token || "",

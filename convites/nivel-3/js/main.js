@@ -13,6 +13,21 @@
   if (C.fonts?.body) root.style.setProperty('--body-font', C.fonts.body);
 
   const get = (path) => path.split('.').reduce((obj, key) => obj?.[key], C);
+  const isMobileViewport = () => window.matchMedia('(max-width: 767px)').matches;
+  const pickAsset = (asset) => {
+    if (!asset) return '';
+    if (typeof asset === 'string') return asset;
+    if (typeof asset === 'object') return isMobileViewport() ? (asset.mobile || asset.desktop || asset.src || '') : (asset.desktop || asset.mobile || asset.src || '');
+    return '';
+  };
+  const applyImageAsset = (img, asset) => {
+    const src = pickAsset(asset);
+    if (img && src && img.getAttribute('src') !== src) img.setAttribute('src', src);
+  };
+  const imageCssValue = (asset) => {
+    const src = pickAsset(asset);
+    return src ? `url("${src.replace(/"/g, '\"')}")` : 'none';
+  };
   document.querySelectorAll('[data-text]').forEach(el => {
     const value = get(el.dataset.text);
     if (value !== undefined && value !== null) el.textContent = value;
@@ -26,8 +41,8 @@
 
   const heroImage = document.getElementById('heroImage');
   const openingImage = document.getElementById('openingImage');
-  if (heroImage && C.hero?.image) heroImage.src = C.hero.image;
-  if (openingImage && C.hero?.image) openingImage.src = C.hero.image;
+  applyImageAsset(heroImage, C.hero?.image);
+  applyImageAsset(openingImage, C.hero?.image);
 
   const params = new URLSearchParams(location.search);
   let invitationContext = null;
@@ -36,7 +51,14 @@
   const legacyGuestName = (params.get(guestParam) || '').trim();
   const guestName = invitationContext?.displayName || legacyGuestName;
   const greeting = document.getElementById('personalGreeting');
-  if (greeting) greeting.textContent = guestName ? `${C.opening.guestPrefix} ${guestName}` : '';
+  const greetingLabel = document.getElementById('personalGreetingLabel');
+  const heroGuestBadge = document.getElementById('heroGuestBadge');
+  if (greetingLabel) greetingLabel.textContent = guestName ? (C.opening?.guestPrefix || 'Convite destinado a') : '';
+  if (greeting) greeting.textContent = guestName || '';
+  if (heroGuestBadge) {
+    if (guestName) { heroGuestBadge.hidden = false; heroGuestBadge.textContent = `Convidado: ${guestName}`; }
+    else heroGuestBadge.hidden = true;
+  }
   const rsvpName = document.getElementById('rsvpName');
   if (rsvpName && guestName) rsvpName.value = guestName;
 
@@ -78,7 +100,7 @@
   updateCountdown(); setInterval(updateCountdown, 1000);
 
   const storyImage = document.getElementById('storyImage');
-  if (storyImage && C.story?.image) storyImage.src = C.story.image;
+  applyImageAsset(storyImage, C.story?.image);
   const storyParagraphs = document.getElementById('storyParagraphs');
   if (storyParagraphs) (C.story?.paragraphs || []).forEach(text => {
     const p = document.createElement('p'); p.textContent = text; storyParagraphs.appendChild(p);
@@ -88,16 +110,31 @@
   const eventGrid = document.getElementById('eventGrid');
   (C.events || []).forEach((event, index) => {
     const article = document.createElement('article'); article.className = 'event-card';
-    article.innerHTML = `<span class="event-card__index">0${index + 1} · ${event.label}</span><h3>${event.venue}</h3><p class="event-card__time">${event.time}</p><address>${event.address}</address><a href="${event.mapsUrl}" target="_blank" rel="noopener">${event.mapsLabel} →</a>`;
+    const mediaStyle = event.image ? ` style="--event-image:${imageCssValue(event.image)}"` : '';
+    article.innerHTML = `<div class="event-card__media"${mediaStyle} aria-hidden="true"></div><div class="event-card__body"><span class="event-card__index">0${index + 1} · ${event.label}</span><h3>${event.venue}</h3><p class="event-card__time">${event.time}</p><address>${event.address}</address><a href="${event.mapsUrl}" target="_blank" rel="noopener">${event.mapsLabel} →</a></div>`;
     eventGrid?.appendChild(article);
   });
 
   const timeline = document.getElementById('timeline');
+  const scheduleSection = document.getElementById('programacao');
+  const defaultScheduleImage = C.schedule?.backgroundImage ? imageCssValue(C.schedule.backgroundImage) : 'none';
+  const setScheduleBackground = (value) => { if (scheduleSection) scheduleSection.style.setProperty('--schedule-bg-image', value || defaultScheduleImage || 'none'); };
+  setScheduleBackground(defaultScheduleImage);
   (C.schedule?.items || []).forEach(item => {
     const row = document.createElement('div'); row.className = 'timeline-item';
+    const itemImage = item.image ? imageCssValue(item.image) : '';
     row.innerHTML = `<time>${item.time}</time><div><h3>${item.title}</h3><p>${item.text}</p></div>`;
+    if (itemImage) {
+      row.dataset.bgImage = itemImage;
+      const activate = () => setScheduleBackground(itemImage);
+      row.addEventListener('mouseenter', activate);
+      row.addEventListener('focusin', activate);
+    }
+    row.addEventListener('mouseleave', () => setScheduleBackground(defaultScheduleImage));
+    row.addEventListener('focusout', () => setScheduleBackground(defaultScheduleImage));
     timeline?.appendChild(row);
   });
+  timeline?.addEventListener('mouseleave', () => setScheduleBackground(defaultScheduleImage));
   if (C.schedule?.enabled === false) document.getElementById('programacao')?.remove();
 
   const galleryGrid = document.getElementById('galleryGrid');
@@ -129,7 +166,7 @@
   document.addEventListener('keydown', e => { if (!lightbox?.classList.contains('is-open')) return; if (e.key === 'Escape') closeLightbox(); if (e.key === 'ArrowLeft') showImage(currentImage - 1); if (e.key === 'ArrowRight') showImage(currentImage + 1); });
 
   const dressImage = document.getElementById('dressImage');
-  if (dressImage && C.dressCode?.image) dressImage.src = C.dressCode.image;
+  applyImageAsset(dressImage, C.dressCode?.image);
   const palette = document.getElementById('dressPalette');
   (C.dressCode?.palette || []).forEach(color => { const swatch = document.createElement('span'); swatch.style.background = color; palette?.appendChild(swatch); });
   if (C.dressCode?.enabled === false) document.getElementById('dress-code')?.remove();
@@ -156,9 +193,7 @@
   if (C.faq?.enabled === false) document.getElementById('duvidas')?.remove();
 
   const rsvpImage = document.getElementById('rsvpImage');
-  if (rsvpImage && C.images?.rsvp) rsvpImage.src = C.images.rsvp;
-  const mealField = document.getElementById('mealField');
-  if (mealField && C.rsvp?.collectMealPreference === false) mealField.remove();
+  applyImageAsset(rsvpImage, C.images?.rsvp);
   const guestCount = document.getElementById('guestCount');
   const guestCountField = document.getElementById('guestCountField');
   const memberSection = document.getElementById('rsvpMembers');
@@ -189,7 +224,6 @@
       memberOptions.querySelectorAll('input[name="member_name"]').forEach(input => { input.checked = previousNames.includes(input.value); });
       if (guestCount) guestCount.value = String(previousNames.length || previous.guestCount || previous.guest_count || 0);
     } else if (guestCount) guestCount.value = String(previous.guestCount ?? previous.guest_count ?? 1);
-    const meal = document.querySelector('[name="alimentacao"]'); if (meal) meal.value = previous.mealNotes || previous.meal_notes || '';
     const msg = document.querySelector('[name="mensagem"]'); if (msg) msg.value = previous.message || '';
   }
 
@@ -207,7 +241,7 @@
         if (attending && invitationMembers.length && selectedMembers.length === 0) throw new Error('Selecione ao menos uma pessoa que estará presente.');
         const result = await window.GuestSystem.submit(C.guestSystem, invitationContext, {
           attending, guestCount: attending ? (invitationMembers.length ? selectedMembers.length : Number(payload.convidados || 1)) : 0, submittedName: payload.nome || guestName,
-          mealNotes: payload.alimentacao || '', message: payload.mensagem || '', guestNames: attending ? selectedMembers : []
+          message: payload.mensagem || '', guestNames: attending ? selectedMembers : []
         });
         status.textContent = result.message || 'Confirmação registrada com sucesso.';
       } catch (error) { status.textContent = error.message || 'Não foi possível enviar. Tente novamente.'; }
@@ -215,7 +249,6 @@
     }
     if (mode === 'whatsapp' && C.rsvp.whatsappNumber) {
       const lines = [C.rsvp.baseMessage, '', `Nome: ${payload.nome}`, `Presença: ${payload.presenca}`, `Número de pessoas: ${payload.convidados}`];
-      if (payload.alimentacao) lines.push(`Alimentação: ${payload.alimentacao}`);
       if (payload.mensagem) lines.push(`Mensagem: ${payload.mensagem}`);
       location.href = `https://wa.me/${C.rsvp.whatsappNumber}?text=${encodeURIComponent(lines.join('\n'))}`;
       return;
@@ -238,6 +271,23 @@
     const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Convite Nivel 3//PT-BR','BEGIN:VEVENT',`DTSTART:${toICSDate(C.wedding.dateISO)}`,`DTEND:${toICSDate(C.wedding.endISO)}`,`SUMMARY:${C.wedding.calendarTitle}`,`DESCRIPTION:${C.wedding.calendarDescription}`,`LOCATION:${C.wedding.calendarLocation}`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'casamento.ics'; a.click(); URL.revokeObjectURL(a.href);
+  });
+
+  let responsiveImageTimer = null;
+  addEventListener('resize', () => {
+    clearTimeout(responsiveImageTimer);
+    responsiveImageTimer = setTimeout(() => {
+      applyImageAsset(heroImage, C.hero?.image);
+      applyImageAsset(openingImage, C.hero?.image);
+      applyImageAsset(storyImage, C.story?.image);
+      applyImageAsset(dressImage, C.dressCode?.image);
+      applyImageAsset(rsvpImage, C.images?.rsvp);
+      eventGrid?.querySelectorAll('.event-card__media').forEach((media, index) => {
+        const asset = C.events?.[index]?.image;
+        if (asset) media.style.setProperty('--event-image', imageCssValue(asset));
+      });
+      setScheduleBackground(defaultScheduleImage);
+    }, 120);
   });
 
   const shareButton = document.getElementById('shareButton');
