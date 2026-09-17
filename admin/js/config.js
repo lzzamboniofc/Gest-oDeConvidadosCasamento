@@ -18,11 +18,11 @@
   NUNCA coloque secret key / service_role neste arquivo.
 */
 window.GUEST_ADMIN_CONFIG = {
-  mode: "demo", // "demo" ou "supabase"
+  mode: "supabase", // "demo" ou "supabase"
   demoRole: "admin", // em DEMO: "admin" ou "couple" (também aceita ?perfil=casal)
 
-  supabaseUrl: "https://SEU-PROJETO.supabase.co",
-  publishableKey: "SUA_CHAVE_PUBLICAVEL",
+  supabaseUrl: "https://oblucxwvsouyjhfqaten.supabase.co",
+  publishableKey: "sb_publishable_1NGjECehE1zlq5jYGa6cCQ_3w0Jb4bb",
 
   // Usado como sugestão ao criar um casamento novo.
   defaultInviteBaseUrl: "../convites/nivel-3/index.html",

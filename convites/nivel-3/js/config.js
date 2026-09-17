@@ -260,9 +260,9 @@ window.WEDDING_CONFIG = {
   */
   guestSystem: {
     enabled: true,
-    mode: "demo", // "demo" ou "api"
+    mode: "api", // "demo" ou "api"
     tokenQueryParam: "convite",
-    endpoint: "https://SEU-PROJETO.supabase.co/functions/v1/invite-public",
+    endpoint: "https://oblucxwvsouyjhfqaten.supabase.co/functions/v1/invite-public",
     demoInvites: {
       "DEMO-FAMILIA-SILVA": { displayName: "Família Silva", seats: 4, members: ["João Silva", "Maria Silva", "Pedro Silva", "Ana Silva"] },
       "DEMO-MARIA-SOUZA": { displayName: "Maria Souza", seats: 1, members: ["Maria Souza"] },
