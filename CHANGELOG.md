@@ -54,3 +54,11 @@
 - Cards “Onde & quando” com divisão visual entre fundo sólido e imagem do local.
 - Seção de roteiro com troca de imagem de fundo ao passar o mouse sobre cada item.
 - Suporte a imagens responsivas por seção usando objetos desktop/mobile no config.js.
+
+
+## v1.7 — RSVP e atualização do painel
+- Modal claro após o envio do RSVP, com opção de recarregar o convite.
+- Bloqueio do formulário depois da primeira resposta e proteção contra segunda confirmação também na Edge Function.
+- Remoção do botão “Compartilhar convite”.
+- Botão “Atualizar” no painel administrativo para buscar RSVP e demais dados novamente.
+- Correção de caminhos de imagens dinâmicas no GitHub Pages usando URLs absolutas resolvidas a partir do documento.

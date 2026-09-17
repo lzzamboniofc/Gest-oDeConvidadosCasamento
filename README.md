@@ -175,3 +175,7 @@ modelos/modelo-importacao-convidados.xlsx
 ## Segurança no Git
 
 O `.gitignore` bloqueia `.env`, chaves privadas, arquivos temporários, configurações de IDE e diretórios locais do Supabase. Revise `git status` e `git diff` antes de cada commit.
+
+
+### Atualização v1.7
+Depois de enviar uma confirmação, o convite exibe um modal de sucesso e bloqueia novos envios. A Edge Function `invite-public` também rejeita uma segunda resposta para o mesmo token. O painel ganhou o botão **Atualizar** para buscar imediatamente novos RSVPs. Para aplicar esta versão em um projeto já publicado, substitua os arquivos do frontend e faça novo deploy da Edge Function `invite-public`. Não há alteração de schema do banco nesta versão.

@@ -25,3 +25,8 @@
 
 .demo-buttons{display:grid;gap:8px}.demo-buttons .btn{text-align:center}.panel--flush .responsive-data-table tbody{padding:0}@media(max-width:760px){.panel--flush .responsive-data-table tbody{padding:12px}}
 @media(max-width:650px){.topbar #newWeddingButton:not([hidden]){display:grid;width:40px;height:40px;place-items:center;padding:0;font-size:0;flex:0 0 auto}.topbar #newWeddingButton:not([hidden])::after{content:"+";font-size:24px;line-height:1}}
+
+
+/* v1.7 — atualização manual */
+.topbar-actions{display:flex;align-items:center;gap:10px}.btn--refresh{display:inline-flex;align-items:center;gap:8px}.btn--refresh span{font-size:17px;line-height:1}.btn--refresh.is-loading span{animation:refresh-spin .7s linear infinite}@keyframes refresh-spin{to{transform:rotate(360deg)}}
+@media(max-width:650px){.topbar-actions{gap:8px}.topbar #refreshButton{display:grid;width:40px;height:40px;place-items:center;padding:0;flex:0 0 auto}.topbar #refreshButton b{display:none}.topbar #refreshButton span{font-size:20px}}

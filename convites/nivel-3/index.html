@@ -197,7 +197,6 @@
             <button class="button button--primary button--wide" type="submit" data-text="rsvp.buttonLabel"></button>
             <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
           </form>
-          <button class="text-action share-action" id="shareButton" type="button">Compartilhar convite</button>
         </div>
       </div>
     </section>
@@ -209,6 +208,20 @@
     <p data-text="footer.text"></p>
     <span><span data-text="wedding.longDate"></span> · <span data-text="wedding.city"></span></span>
   </footer>
+
+
+  <dialog class="rsvp-success-dialog" id="rsvpSuccessDialog" aria-labelledby="rsvpSuccessTitle">
+    <div class="rsvp-success-dialog__panel">
+      <span class="rsvp-success-dialog__icon" aria-hidden="true">✓</span>
+      <p class="eyebrow">Confirmação recebida</p>
+      <h2 id="rsvpSuccessTitle">Sua resposta foi registrada.</h2>
+      <p id="rsvpSuccessText">Obrigado por confirmar. Deseja recarregar o convite agora?</p>
+      <div class="rsvp-success-dialog__actions">
+        <button class="button button--ghost" id="rsvpStayButton" type="button">Agora não</button>
+        <button class="button button--primary" id="rsvpReloadButton" type="button">Sim, recarregar</button>
+      </div>
+    </div>
+  </dialog>
 
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <button class="lightbox__close" id="lightboxClose" type="button" aria-label="Fechar">×</button>

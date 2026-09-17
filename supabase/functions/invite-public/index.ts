@@ -63,6 +63,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (action === "rsvp") {
+      if (existing) return json(req, { error: "Este convite já possui uma confirmação registrada." }, 409);
       if (typeof body.attending !== "boolean") return json(req, { error: "Resposta de presença inválida" }, 400);
       const attending = body.attending;
       const count = attending ? Number(body.guestCount) : 0;

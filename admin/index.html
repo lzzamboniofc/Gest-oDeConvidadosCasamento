@@ -46,7 +46,10 @@
           <span class="eyebrow">Casamento selecionado</span>
           <select id="weddingSelect" aria-label="Selecionar casamento"></select>
         </div>
-        <button class="btn btn--secondary" id="newWeddingButton" data-admin-only type="button">+ Novo casamento</button>
+        <div class="topbar-actions">
+          <button class="btn btn--secondary btn--refresh" id="refreshButton" type="button" title="Atualizar dados"><span aria-hidden="true">↻</span><b>Atualizar</b></button>
+          <button class="btn btn--secondary" id="newWeddingButton" data-admin-only type="button">+ Novo casamento</button>
+        </div>
       </header>
 
       <section class="view is-active" id="view-dashboard">

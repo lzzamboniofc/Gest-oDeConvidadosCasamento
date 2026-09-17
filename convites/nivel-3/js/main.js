@@ -20,12 +20,17 @@
     if (typeof asset === 'object') return isMobileViewport() ? (asset.mobile || asset.desktop || asset.src || '') : (asset.desktop || asset.mobile || asset.src || '');
     return '';
   };
-  const applyImageAsset = (img, asset) => {
+  const resolveAssetUrl = (asset) => {
     const src = pickAsset(asset);
+    if (!src) return '';
+    try { return new URL(src, document.baseURI).href; } catch { return src; }
+  };
+  const applyImageAsset = (img, asset) => {
+    const src = resolveAssetUrl(asset);
     if (img && src && img.getAttribute('src') !== src) img.setAttribute('src', src);
   };
   const imageCssValue = (asset) => {
-    const src = pickAsset(asset);
+    const src = resolveAssetUrl(asset);
     return src ? `url("${src.replace(/"/g, '\"')}")` : 'none';
   };
   document.querySelectorAll('[data-text]').forEach(el => {
@@ -141,7 +146,7 @@
   const galleryImages = C.gallery?.images || [];
   galleryImages.forEach((image, index) => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'gallery-item'; button.dataset.index = index;
-    button.innerHTML = `<img src="${image.src}" alt="${image.alt || ''}" loading="lazy"><span>${image.caption || `Foto ${index + 1}`}</span>`;
+    button.innerHTML = `<img src="${resolveAssetUrl(image.src)}" alt="${image.alt || ''}" loading="lazy"><span>${image.caption || `Foto ${index + 1}`}</span>`;
     galleryGrid?.appendChild(button);
   });
   if (C.gallery?.enabled === false) document.getElementById('galeria')?.remove();
@@ -154,7 +159,7 @@
     if (!galleryImages.length) return;
     currentImage = (index + galleryImages.length) % galleryImages.length;
     const img = galleryImages[currentImage];
-    lightboxImage.src = img.src; lightboxImage.alt = img.alt || ''; lightboxCaption.textContent = img.caption || '';
+    lightboxImage.src = resolveAssetUrl(img.src); lightboxImage.alt = img.alt || ''; lightboxCaption.textContent = img.caption || '';
   };
   const openLightbox = (index) => { showImage(index); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); };
   const closeLightbox = () => { lightbox.classList.remove('is-open'); lightbox.setAttribute('aria-hidden', 'true'); };
@@ -214,6 +219,34 @@
     memberOptions.addEventListener('change', syncMemberCount);
   }
 
+  const rsvpForm = document.getElementById('rsvpForm');
+  const status = document.getElementById('formStatus');
+  const rsvpSubmitButton = rsvpForm?.querySelector('button[type="submit"]');
+  const rsvpSuccessDialog = document.getElementById('rsvpSuccessDialog');
+  const rsvpSuccessText = document.getElementById('rsvpSuccessText');
+  const lockRsvp = (response) => {
+    if (!rsvpForm) return;
+    rsvpForm.dataset.locked = '1';
+    rsvpForm.querySelectorAll('input, select, textarea, button[type="submit"]').forEach(el => { el.disabled = true; });
+    rsvpForm.classList.add('rsvp-form--locked');
+    if (rsvpSubmitButton) rsvpSubmitButton.textContent = 'Confirmação já enviada';
+    if (status) {
+      status.textContent = response?.attending === false
+        ? 'Sua resposta já foi registrada neste convite.'
+        : 'Sua presença já foi confirmada neste convite.';
+      status.classList.add('form-status--success');
+    }
+  };
+  const showRsvpSuccess = (attending) => {
+    if (rsvpSuccessText) rsvpSuccessText.textContent = attending
+      ? 'Sua presença foi confirmada com sucesso. Deseja recarregar o convite agora?'
+      : 'Sua resposta foi registrada com sucesso. Deseja recarregar o convite agora?';
+    if (rsvpSuccessDialog?.showModal) rsvpSuccessDialog.showModal();
+    else if (confirm('Sua resposta foi registrada. Recarregar o convite agora?')) location.reload();
+  };
+  document.getElementById('rsvpReloadButton')?.addEventListener('click', () => location.reload());
+  document.getElementById('rsvpStayButton')?.addEventListener('click', () => rsvpSuccessDialog?.close());
+
   if (invitationContext?.rsvp) {
     const previous = invitationContext.rsvp;
     if (rsvpName && (previous.submittedName || previous.submitted_name)) rsvpName.value = previous.submittedName || previous.submitted_name;
@@ -227,10 +260,13 @@
     const msg = document.querySelector('[name="mensagem"]'); if (msg) msg.value = previous.message || '';
   }
 
-  const rsvpForm = document.getElementById('rsvpForm');
-  const status = document.getElementById('formStatus');
+  if (invitationContext?.rsvp) lockRsvp(invitationContext.rsvp);
+
   rsvpForm?.addEventListener('submit', async e => {
     e.preventDefault();
+    if (rsvpForm.dataset.locked === '1' || rsvpForm.dataset.submitting === '1') return;
+    rsvpForm.dataset.submitting = '1';
+    if (rsvpSubmitButton) { rsvpSubmitButton.disabled = true; rsvpSubmitButton.textContent = 'Enviando...'; }
     const data = new FormData(rsvpForm);
     const payload = Object.fromEntries(data.entries());
     const mode = C.rsvp?.mode || 'demo';
@@ -243,8 +279,15 @@
           attending, guestCount: attending ? (invitationMembers.length ? selectedMembers.length : Number(payload.convidados || 1)) : 0, submittedName: payload.nome || guestName,
           message: payload.mensagem || '', guestNames: attending ? selectedMembers : []
         });
-        status.textContent = result.message || 'Confirmação registrada com sucesso.';
-      } catch (error) { status.textContent = error.message || 'Não foi possível enviar. Tente novamente.'; }
+        invitationContext.rsvp = { attending, guestCount: attending ? (invitationMembers.length ? selectedMembers.length : Number(payload.convidados || 1)) : 0, guestNames: selectedMembers, submittedName: payload.nome || guestName, message: payload.mensagem || '' };
+        lockRsvp(invitationContext.rsvp);
+        showRsvpSuccess(attending);
+      } catch (error) {
+        status.textContent = error.message || 'Não foi possível enviar. Tente novamente.';
+        status.classList.remove('form-status--success');
+        rsvpForm.dataset.submitting = '0';
+        if (rsvpSubmitButton) { rsvpSubmitButton.disabled = false; rsvpSubmitButton.textContent = C.rsvp?.buttonLabel || 'Enviar confirmação'; }
+      }
       return;
     }
     if (mode === 'whatsapp' && C.rsvp.whatsappNumber) {
@@ -258,11 +301,11 @@
         status.textContent = 'Enviando...';
         const response = await fetch(C.rsvp.formAction, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
         if (!response.ok) throw new Error('Falha no envio');
-        status.textContent = C.rsvp.successMessage || 'Confirmação enviada.'; rsvpForm.reset();
-      } catch { status.textContent = 'Não foi possível enviar. Tente novamente.'; }
+        status.textContent = C.rsvp.successMessage || 'Confirmação enviada.'; rsvpForm.reset(); rsvpForm.dataset.submitting = '0'; if (rsvpSubmitButton) { rsvpSubmitButton.disabled = false; rsvpSubmitButton.textContent = C.rsvp?.buttonLabel || 'Enviar confirmação'; }
+      } catch { status.textContent = 'Não foi possível enviar. Tente novamente.'; rsvpForm.dataset.submitting = '0'; if (rsvpSubmitButton) { rsvpSubmitButton.disabled = false; rsvpSubmitButton.textContent = C.rsvp?.buttonLabel || 'Enviar confirmação'; } }
       return;
     }
-    status.textContent = `Modo demonstração: confirmação de ${payload.nome} preenchida corretamente.`;
+    status.textContent = `Modo demonstração: confirmação de ${payload.nome} preenchida corretamente.`; rsvpForm.dataset.submitting = '0'; if (rsvpSubmitButton) { rsvpSubmitButton.disabled = false; rsvpSubmitButton.textContent = C.rsvp?.buttonLabel || 'Enviar confirmação'; }
   });
   if (C.rsvp?.enabled === false) document.getElementById('rsvp')?.remove();
 
@@ -290,12 +333,6 @@
     }, 120);
   });
 
-  const shareButton = document.getElementById('shareButton');
-  if (C.sharing?.enabled === false) shareButton?.remove();
-  else shareButton?.addEventListener('click', async () => {
-    const data = { title: C.sharing.title, text: C.sharing.text, url: location.href };
-    try { if (navigator.share) await navigator.share(data); else { await navigator.clipboard.writeText(location.href); shareButton.textContent = 'Link copiado ✓'; } } catch (_) {}
-  });
 
   const backTop = document.getElementById('backTop');
   const onScroll = () => backTop?.classList.toggle('is-visible', scrollY > innerHeight * .75);

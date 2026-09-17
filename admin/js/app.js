@@ -440,6 +440,15 @@ async function regenerateToken(id) {
 function bindActions(){
   $$(".nav-item").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.view)));
   $("#mobileMenu").addEventListener("click",()=>$(".sidebar").classList.toggle("is-open"));
+  $("#refreshButton")?.addEventListener("click", async () => {
+    const button = $("#refreshButton");
+    try {
+      button.disabled = true; button.classList.add("is-loading");
+      await refreshAll(state.weddingId);
+      toast("Dados atualizados.");
+    } catch (err) { toast(err.message || "Não foi possível atualizar os dados."); }
+    finally { button.disabled = false; button.classList.remove("is-loading"); }
+  });
   $$('[data-open-invite]').forEach(b=>b.addEventListener("click",()=>openInvite()));
   $("[data-go-guests]").addEventListener("click",()=>showView("guests"));
   $("#newWeddingButton").addEventListener("click",openWedding);
