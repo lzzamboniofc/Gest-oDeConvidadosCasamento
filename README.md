@@ -183,3 +183,6 @@ O `.gitignore` bloqueia `.env`, chaves privadas, arquivos temporários, configur
 
 ### Atualização v1.7
 Depois de enviar uma confirmação, o convite exibe um modal de sucesso e bloqueia novos envios. A Edge Function `invite-public` também rejeita uma segunda resposta para o mesmo token. O painel ganhou o botão **Atualizar** para buscar imediatamente novos RSVPs. Para aplicar esta versão em um projeto já publicado, substitua os arquivos do frontend e faça novo deploy da Edge Function `invite-public`. Não há alteração de schema do banco nesta versão.
+
+## v1.9 — respostas do RSVP no painel
+Convites que já responderam exibem o botão **Ver resposta** no dashboard e na lista de convidados. O modal mostra status, data/hora, responsável, quantidade confirmada, nomes selecionados e a mensagem enviada aos noivos. Nenhuma alteração de banco é necessária nesta versão.

@@ -297,8 +297,9 @@ function rowHtml(inv, compact=false) {
   const status = statusOf(inv); const r = rsvpOf(inv); const confirmed = status === "confirmed" ? r?.guest_count ?? 0 : "—";
   const memberCount = membersOf(inv).length;
   const memberMeta = memberCount ? `${memberCount} membro${memberCount === 1 ? "" : "s"}` : "sem membros individuais";
-  if (compact) return `<tr><td class="guest-name" data-label="Convite"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Resposta">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><button class="mini-btn" data-copy="${inv.id}">Copiar link</button></td></tr>`;
-  return `<tr><td class="guest-name" data-label="Convidado / família"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Contato"><span>${escapeHtml(inv.contact_name || "—")}</span><br><small class="muted">${escapeHtml(inv.phone || "")}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Confirmados">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><div class="row-actions"><button class="mini-btn" title="Copiar link" data-copy="${inv.id}">Link</button><button class="mini-btn" title="Enviar pelo WhatsApp" data-whatsapp="${inv.id}">WhatsApp</button><button class="mini-btn" title="Editar convite" data-edit="${inv.id}">Editar</button><button class="mini-btn" title="Invalidar o link antigo e gerar outro" data-regenerate="${inv.id}">Novo token</button><button class="mini-btn mini-btn--danger" title="Excluir" data-delete="${inv.id}">Excluir</button></div></td></tr>`;
+  const responseButton = status !== "pending" ? `<button class="mini-btn mini-btn--response" title="Ver resposta do RSVP" data-response="${inv.id}">Ver resposta</button>` : "";
+  if (compact) return `<tr><td class="guest-name" data-label="Convite"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Resposta">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><div class="row-actions row-actions--compact">${responseButton}<button class="mini-btn" data-copy="${inv.id}">Copiar link</button></div></td></tr>`;
+  return `<tr><td class="guest-name" data-label="Convidado / família"><strong>${escapeHtml(inv.display_name)}</strong><small>${escapeHtml(inv.category || "Sem categoria")} · ${escapeHtml(memberMeta)}</small></td><td data-label="Contato"><span>${escapeHtml(inv.contact_name || "—")}</span><br><small class="muted">${escapeHtml(inv.phone || "")}</small></td><td data-label="Lugares">${inv.seats}</td><td data-label="Confirmados">${confirmed}</td><td data-label="Status"><span class="status status--${status}">${statusLabel(status)}</span></td><td data-label="Ações"><div class="row-actions">${responseButton}<button class="mini-btn" title="Copiar link" data-copy="${inv.id}">Link</button><button class="mini-btn" title="Enviar pelo WhatsApp" data-whatsapp="${inv.id}">WhatsApp</button><button class="mini-btn" title="Editar convite" data-edit="${inv.id}">Editar</button><button class="mini-btn" title="Invalidar o link antigo e gerar outro" data-regenerate="${inv.id}">Novo token</button><button class="mini-btn mini-btn--danger" title="Excluir" data-delete="${inv.id}">Excluir</button></div></td></tr>`;
 }
 function filteredInvitations() {
   const q = $("#searchInput").value.trim().toLowerCase(); const filter = $("#statusFilter").value;
@@ -428,6 +429,51 @@ function exportCsv() {
   toast("CSV exportado.");
 }
 
+function openResponse(id) {
+  const inv = state.invitations.find(i => i.id === id);
+  if (!inv) return;
+  const r = rsvpOf(inv);
+  if (!r) return toast("Este convite ainda não possui resposta.");
+
+  const status = statusOf(inv);
+  const attending = status === "confirmed";
+  const guestNames = Array.isArray(r.guest_names) ? r.guest_names : (Array.isArray(r.guestNames) ? r.guestNames : []);
+  const submittedName = r.submitted_name ?? r.submittedName ?? inv.contact_name ?? inv.display_name ?? "—";
+  const guestCount = Number(r.guest_count ?? r.guestCount ?? 0);
+  const message = String(r.message || "").trim();
+  const respondedAt = r.responded_at ?? r.respondedAt ?? "";
+
+  $("#responseDialogTitle").textContent = attending ? "Presença confirmada" : "Não poderá comparecer";
+  $("#responseInviteName").textContent = inv.display_name || "—";
+  $("#responseSubmittedName").textContent = submittedName || "—";
+  $("#responseGuestCount").textContent = attending ? String(guestCount) : "0";
+  $("#responseDate").textContent = respondedAt ? `Respondido em ${formatDateTime(respondedAt)}` : "";
+
+  const badge = $("#responseStatusBadge");
+  badge.className = `status status--${status}`;
+  badge.textContent = statusLabel(status);
+
+  const namesBlock = $("#responseNamesBlock");
+  const names = $("#responseGuestNames");
+  if (attending && guestNames.length) {
+    namesBlock.hidden = false;
+    names.innerHTML = guestNames.map(name => `<span>${escapeHtml(name)}</span>`).join("");
+  } else if (attending && guestCount > 0) {
+    namesBlock.hidden = false;
+    names.innerHTML = `<span>${guestCount} ${guestCount === 1 ? "pessoa confirmada" : "pessoas confirmadas"}</span>`;
+  } else {
+    namesBlock.hidden = true;
+    names.innerHTML = "";
+  }
+
+  const messageEl = $("#responseMessage");
+  messageEl.textContent = message || "Nenhuma mensagem foi deixada neste RSVP.";
+  messageEl.classList.toggle("is-empty", !message);
+
+  $("#responseDialog").showModal();
+}
+function closeResponse(){ $("#responseDialog")?.close(); }
+
 async function copyLink(id){ const inv=state.invitations.find(i=>i.id===id); const link=buildLink(inv,currentWedding()); await navigator.clipboard.writeText(link); toast("Link personalizado copiado."); }
 function whatsapp(id){ const inv=state.invitations.find(i=>i.id===id); const w=currentWedding(); const link=buildLink(inv,w); const text=`Olá, ${inv.display_name}! 💍\n\nPreparamos um convite especial para vocês.\n\nAcesse o convite personalizado:\n${link}`; const phone=String(inv.phone||"").replace(/\D/g,""); window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`,"_blank","noopener"); }
 async function regenerateToken(id) {
@@ -460,6 +506,7 @@ function bindActions(){
   $$('[data-close-import]').forEach(b=>b.addEventListener("click",closeImport));
   $$('[data-close-dialog]').forEach(b=>b.addEventListener("click",closeInvite));
   $$('[data-close-wedding]').forEach(b=>b.addEventListener("click",()=>$("#weddingDialog").close()));
+  $$('[data-close-response]').forEach(b=>b.addEventListener("click",closeResponse));
   $("#weddingSelect").addEventListener("change",async e=>{await refreshAll(e.target.value)});
   $("#searchInput").addEventListener("input",renderTables); $("#statusFilter").addEventListener("change",renderTables);
   $("#accessForm")?.addEventListener("submit", async e => {
@@ -474,6 +521,7 @@ function bindActions(){
   document.addEventListener("click",async e=>{
     const b=e.target.closest("button"); if(!b)return;
     try {
+      if(b.dataset.response) openResponse(b.dataset.response);
       if(b.dataset.copy) await copyLink(b.dataset.copy);
       if(b.dataset.whatsapp) whatsapp(b.dataset.whatsapp);
       if(b.dataset.edit) openInvite(b.dataset.edit);

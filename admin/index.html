@@ -203,6 +203,40 @@
     </form>
   </dialog>
 
+  <dialog id="responseDialog" class="dialog response-dialog">
+    <div class="dialog__panel response-dialog__panel">
+      <header>
+        <div><span class="eyebrow">RSVP</span><h2 id="responseDialogTitle">Resposta do convite</h2></div>
+        <button class="icon-button" type="button" data-close-response aria-label="Fechar">×</button>
+      </header>
+
+      <div class="response-status-wrap">
+        <span class="status" id="responseStatusBadge">Pendente</span>
+        <span class="response-date" id="responseDate"></span>
+      </div>
+
+      <div class="response-summary-grid">
+        <article><span>Convite</span><strong id="responseInviteName">—</strong></article>
+        <article><span>Respondido por</span><strong id="responseSubmittedName">—</strong></article>
+        <article><span>Confirmados</span><strong id="responseGuestCount">0</strong></article>
+      </div>
+
+      <section class="response-block" id="responseNamesBlock">
+        <span class="response-block__label">Quem confirmou presença</span>
+        <div class="response-names" id="responseGuestNames"></div>
+      </section>
+
+      <section class="response-message-card">
+        <span class="response-block__label">Mensagem para os noivos</span>
+        <p id="responseMessage"></p>
+      </section>
+
+      <footer>
+        <button class="btn btn--primary" type="button" data-close-response>Fechar</button>
+      </footer>
+    </div>
+  </dialog>
+
   <dialog id="weddingDialog" class="dialog">
     <form method="dialog" class="dialog__panel" id="newWeddingForm">
       <header><div><span class="eyebrow">Novo projeto</span><h2>Criar casamento</h2></div><button class="icon-button" value="cancel" type="button" data-close-wedding>×</button></header>

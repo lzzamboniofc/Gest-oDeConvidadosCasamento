@@ -70,3 +70,10 @@
 - Ícones de play/pause, disco giratório e equalizador animado enquanto toca.
 - Layout maior no desktop e compacto no mobile.
 - Volume configurável em `convites/nivel-3/js/config.js`.
+
+
+## v1.9 — Respostas no painel
+- Botão “Ver resposta” para RSVPs já respondidos.
+- Modal com status, data/hora, responsável, quantidade confirmada e nomes confirmados.
+- Mensagem para os noivos exibida diretamente no painel, sem depender da exportação.
+- Visual adaptado para desktop e mobile.
