@@ -125,12 +125,12 @@ window.WEDDING_CONFIG = {
   story: {
     enabled: true,
     eyebrow: "Nossa história",
-    title: "O acaso virou escolha. A escolha virou casa.",
+    title: "O acaso virou escolha. A escolha virou casa...",
     image: {
       desktop: "assets/images/story.jpg",
       mobile: "assets/images/story.jpg"
     },
-    year: "desde 2023",
+    year: "desde 2022",
     paragraphs: [
       "Tudo começou sem grandes planos: uma conversa que durou mais do que deveria, um café que virou jantar e a sensação de que o tempo passava diferente quando estávamos juntos.",
       "Vieram viagens, mudanças, planos e a certeza tranquila de que queríamos continuar escolhendo um ao outro. Agora, queremos celebrar essa escolha com quem torna nossa história ainda mais especial."
@@ -241,10 +241,10 @@ window.WEDDING_CONFIG = {
     buttonLabel: "Enviar confirmação",
 
     /* MODOS: "whatsapp", "form" ou "demo" */
-    mode: "demo",
+    mode: "whatsapp",
 
     /* WhatsApp: somente números, com país + DDD. Ex.: 5511999999999 */
-    whatsappNumber: "",
+    whatsappNumber: "5511956766105",
 
     /* Formulário externo, por exemplo Formspree. */
     formAction: "",
