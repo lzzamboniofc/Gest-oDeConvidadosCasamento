@@ -1,18 +1,25 @@
 /*
   ============================================================
-  CONVITE DE CASAMENTO — NÍVEL 3
+  CONVITE DE CASAMENTO — NÍVEL 3 INTEGRADO
   ============================================================
-  Arquivo principal de personalização.
+  Arquivo principal de personalização do convite conectado ao
+  Sistema de Convidados.
 
-  Para criar um novo convite, normalmente basta editar este
-  arquivo e substituir as imagens em assets/images/.
+  IMAGENS RESPONSIVAS
+  -------------------
+  Os pontos fotográficos aceitam:
+    image: "caminho/foto.jpg"
+  ou, para composições diferentes no desktop e no celular:
+    image: {
+      desktop: "caminho/foto-desktop.jpg",
+      mobile: "caminho/foto-mobile.jpg"
+    }
 
-  O Nível 3 foi pensado como um produto premium sem backend:
-  - convite personalizado pelo nome do convidado;
-  - história, programação, galeria, dress code e FAQ;
-  - RSVP por WhatsApp ou formulário externo;
-  - calendário e compartilhamento;
-  - sem lista de presentes ou PIX; com música opcional e integração ao painel de convidados.
+  Enquanto você não tiver duas artes, desktop e mobile podem
+  apontar para o mesmo arquivo. O convite escolhe automaticamente
+  a versão mobile abaixo de 768 px. Para fundos que usam cover,
+  recomenda-se aproximadamente 1920x1080 no desktop e 1080x1920
+  no mobile, mantendo a pessoa/assunto principal na área central.
 */
 
 window.WEDDING_THEMES = {
@@ -181,11 +188,11 @@ window.WEDDING_CONFIG = {
     eyebrow: "Memórias",
     title: "Alguns capítulos antes do grande dia.",
     images: [
-      { src: "assets/images/gallery-1.jpg", alt: "Foto do casal", caption: "Capítulo 01" },
-      { src: "assets/images/gallery-2.jpg", alt: "Foto do casal", caption: "Capítulo 02" },
-      { src: "assets/images/gallery-3.jpg", alt: "Foto do casal", caption: "Capítulo 03" },
-      { src: "assets/images/gallery-4.jpg", alt: "Foto do casal", caption: "Capítulo 04" },
-      { src: "assets/images/gallery-5.jpg", alt: "Foto do casal", caption: "Capítulo 05" }
+      { src: { desktop: "assets/images/gallery-1.jpg", mobile: "assets/images/gallery-1.jpg" }, alt: "Foto do casal", caption: "Capítulo 01" },
+      { src: { desktop: "assets/images/gallery-2.jpg", mobile: "assets/images/gallery-2.jpg" }, alt: "Foto do casal", caption: "Capítulo 02" },
+      { src: { desktop: "assets/images/gallery-3.jpg", mobile: "assets/images/gallery-3.jpg" }, alt: "Foto do casal", caption: "Capítulo 03" },
+      { src: { desktop: "assets/images/gallery-4.jpg", mobile: "assets/images/gallery-4.jpg" }, alt: "Foto do casal", caption: "Capítulo 04" },
+      { src: { desktop: "assets/images/gallery-5.jpg", mobile: "assets/images/gallery-5.jpg" }, alt: "Foto do casal", caption: "Capítulo 05" }
     ]
   },
 
@@ -195,7 +202,10 @@ window.WEDDING_CONFIG = {
     title: "Esporte fino",
     text: "Elegante, leve e confortável. Queremos que você se sinta à vontade para aproveitar cada momento da celebração.",
     note: "Pedimos carinho especial para que branco, off-white, champagne e tons muito claros fiquem reservados para a noiva.",
-    image: "assets/images/dress-code.jpg",
+    image: {
+      desktop: "assets/images/dress-code.jpg",
+      mobile: "assets/images/dress-code.jpg"
+    },
     palette: ["#3F4C39", "#7A8469", "#B8A58B", "#C9B8A4", "#4F3931"]
   },
 

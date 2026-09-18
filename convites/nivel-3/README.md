@@ -1,112 +1,54 @@
-# Convite de Casamento — Nível 3
+# Convite de Casamento — Nível 3 Integrado
 
-Versão premium intermediária da coleção de convites.
+Convite premium conectado ao **Sistema de Convidados**. É a versão usada pelo painel para links individualizados por token.
 
-## Proposta do Nível 3
+## Recursos atuais
 
-O Nível 3 fica entre o Nível 2 e o projeto editorial completo (Nível 4). Ele mantém hospedagem simples, sem banco de dados próprio, mas oferece uma experiência mais sofisticada e personalizável.
-
-### Incluído
-
-- abertura elegante com nome do convidado pela URL;
-- capa fotográfica com data e atalhos;
-- contagem regressiva;
-- história do casal;
-- cerimônia e recepção com links de mapa;
-- programação do evento;
-- galeria com 5 fotos e lightbox;
-- dress code com paleta de referência;
-- informações aos convidados;
-- FAQ;
-- RSVP completo;
-- limite de convidados configurável pela URL;
-- RSVP via WhatsApp, formulário externo ou modo demonstração;
-- botão para adicionar ao calendário;
-- compartilhamento do convite;
-- três presets de cores;
+- abertura personalizada com nome/família do convidado;
+- token individual `?convite=TOKEN`;
+- limite de lugares e membros cadastrados no Supabase;
+- RSVP salvo no banco e bloqueado depois da primeira resposta;
+- mensagem para os noivos;
+- modal de confirmação;
+- capa, história, eventos, roteiro, galeria, dress code, informações e FAQ;
+- troca de fundo no roteiro ao passar o mouse;
+- calendário;
+- mini player de música sem autoplay;
+- imagens responsivas desktop/mobile;
 - layout responsivo.
 
-### Não incluído neste nível
+O botão de compartilhar o convite foi removido porque o link contém um token individual.
 
-- lista de presentes / PIX;
-- música de fundo;
-- painel administrativo;
-- banco de dados próprio;
-- gestão de presentes;
-- arquitetura editorial avançada do Nível 4.
+## Imagens desktop + mobile
 
-## Onde editar
-
-Quase toda a personalização fica em:
-
-`js/config.js`
-
-Troque nomes, data, cidade, textos, locais, programação, FAQ, RSVP, cores e caminhos das imagens nesse arquivo.
-
-As imagens ficam em:
-
-`assets/images/`
-
-## Convite personalizado
-
-Use o parâmetro `convidado`:
-
-`index.html?convidado=Família%20Silva`
-
-A abertura exibirá o nome e o campo de RSVP será preenchido automaticamente.
-
-Também é possível limitar o número de pessoas pelo parâmetro `lugares`:
-
-`index.html?convidado=Família%20Silva&lugares=3`
-
-Nesse exemplo, o RSVP aceitará no máximo 3 pessoas.
-
-## Temas
-
-No `config.js` altere:
+Os principais pontos fotográficos aceitam duas artes. Exemplo em `js/config.js`:
 
 ```js
-themePreset: "sage"
+image: {
+  desktop: "assets/images/hero-desktop.jpg",
+  mobile: "assets/images/hero-mobile.jpg"
+}
 ```
 
-Opções:
+O breakpoint é **768 px**. Se ainda houver apenas uma foto, deixe os dois caminhos apontando para o mesmo arquivo.
 
-- `sage`
-- `champagne`
-- `dusk`
+Para imagens que cobrem grandes áreas com `cover`, uma boa referência é:
 
-## RSVP
+- desktop: aproximadamente **1920 × 1080**;
+- mobile: aproximadamente **1080 × 1920**.
 
-No `config.js`:
+Hoje esse formato é aceito em: hero/abertura, história, cards de local, fundo do roteiro, cada item do roteiro, galeria, dress code e imagem do RSVP.
 
-```js
-mode: "demo"
-```
+## Música
 
-Modos disponíveis:
+Configure no bloco `music` de `js/config.js`. O player não inicia automaticamente. O arquivo padrão fica em `assets/audio/musica.mp3`.
 
-- `demo` — não envia dados;
-- `whatsapp` — cria uma mensagem e abre o WhatsApp;
-- `form` — envia para um serviço externo, como Formspree.
+## Produção
 
-Para WhatsApp, configure `whatsappNumber` somente com números, incluindo país e DDD.
+O sistema integrado usa `guestSystem.mode: "api"` e a Edge Function `invite-public`. Nunca coloque secret/service-role key no convite.
 
-## Estrutura
+Teste sem banco trocando temporariamente `guestSystem.mode` para `demo` e abrindo:
 
 ```text
-ConviteCasamento-Nivel3/
-├── index.html
-├── README.md
-├── css/
-│   └── styles.css
-├── js/
-│   ├── config.js
-│   └── main.js
-└── assets/
-    └── images/
+index.html?convite=DEMO-FAMILIA-SILVA
 ```
-
-
-## Mini player de música (v1.8)
-
-O convite possui um player discreto sem autoplay. Configure em `js/config.js` no bloco `music`. O arquivo padrão fica em `assets/audio/musica.mp3`. Para trocar a trilha, substitua o arquivo ou altere `music.file`.

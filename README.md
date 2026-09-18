@@ -1,8 +1,8 @@
-# Sistema de Convidados + Convites de Casamento — v1.8
+# Sistema de Convidados + Convites de Casamento — v1.10
 
 Estrutura preparada para versionamento no GitHub, publicação no **GitHub Pages** e uso com dois perfis de acesso: **Administrador** e **Casal**.
 
-## O que mudou na v1.8
+## Mini player de música (v1.8)
 
 O convite Nível 3 agora possui **mini player de música sem autoplay**, com visual em vidro fosco, play/pause, disco giratório e equalizador discreto. O componente é maior no desktop e compacto no mobile. A trilha pode ser trocada em `convites/nivel-3/assets/audio/` e configurada em `convites/nivel-3/js/config.js`.
 
@@ -52,6 +52,8 @@ O controle real é feito por **RLS no Supabase**. Ocultar botões no navegador �
 │   ├── schema.sql
 │   ├── migration_v1_2_to_v1_3.sql
 │   ├── migration_v1_4_to_v1_5.sql
+│   ├── migration_v1_5_to_v1_6.sql
+│   ├── migration_v1_9_to_v1_10.sql
 │   ├── config.toml
 │   └── functions/
 │       ├── invite-public/
@@ -186,3 +188,31 @@ Depois de enviar uma confirmação, o convite exibe um modal de sucesso e bloque
 
 ## v1.9 — respostas do RSVP no painel
 Convites que já responderam exibem o botão **Ver resposta** no dashboard e na lista de convidados. O modal mostra status, data/hora, responsável, quantidade confirmada, nomes selecionados e a mensagem enviada aos noivos. Nenhuma alteração de banco é necessária nesta versão.
+
+
+## v1.10 — revisão geral
+
+A revisão completa corrigiu a política RLS que controla o acesso do casal à tabela `weddings`, reforçou a confirmação única do RSVP contra requisições concorrentes e padronizou o suporte a imagem desktop/mobile em todos os pontos fotográficos do Nível 3.
+
+### Banco já existente
+
+Se o projeto já está criado no Supabase, aplique:
+
+```text
+supabase/migration_v1_9_to_v1_10.sql
+```
+
+Depois republique `invite-public`, pois o bloqueio de RSVP foi reforçado na Edge Function.
+
+### Imagens responsivas
+
+No Nível 3, cada fotografia pode continuar sendo uma string simples ou um objeto:
+
+```js
+image: {
+  desktop: "assets/images/foto-desktop.jpg",
+  mobile: "assets/images/foto-mobile.jpg"
+}
+```
+
+O código escolhe automaticamente a versão mobile abaixo de 768 px. Os arquivos de exemplo ainda apontam desktop e mobile para a mesma imagem; basta trocar o caminho `mobile` quando você tiver a arte vertical correspondente.

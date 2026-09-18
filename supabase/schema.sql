@@ -160,7 +160,7 @@ for select to authenticated
 using (
   owner_id = (select auth.uid())
   or exists (select 1 from public.profiles p where p.user_id = (select auth.uid()) and p.role = 'admin')
-  or exists (select 1 from public.wedding_members wm where wm.wedding_id = id and wm.user_id = (select auth.uid()))
+  or exists (select 1 from public.wedding_members wm where wm.wedding_id = weddings.id and wm.user_id = (select auth.uid()))
 );
 
 drop policy if exists "admins_insert_weddings" on public.weddings;
@@ -176,12 +176,12 @@ for update to authenticated
 using (
   owner_id = (select auth.uid())
   or exists (select 1 from public.profiles p where p.user_id = (select auth.uid()) and p.role = 'admin')
-  or exists (select 1 from public.wedding_members wm where wm.wedding_id = id and wm.user_id = (select auth.uid()))
+  or exists (select 1 from public.wedding_members wm where wm.wedding_id = weddings.id and wm.user_id = (select auth.uid()))
 )
 with check (
   owner_id = (select auth.uid())
   or exists (select 1 from public.profiles p where p.user_id = (select auth.uid()) and p.role = 'admin')
-  or exists (select 1 from public.wedding_members wm where wm.wedding_id = id and wm.user_id = (select auth.uid()))
+  or exists (select 1 from public.wedding_members wm where wm.wedding_id = weddings.id and wm.user_id = (select auth.uid()))
 );
 
 drop policy if exists "admins_delete_weddings" on public.weddings;

@@ -82,8 +82,11 @@ Deno.serve(async (req: Request) => {
         responded_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
-      const { error: upsertError } = await db.from("rsvps").upsert(payload, { onConflict: "invitation_id" });
-      if (upsertError) throw upsertError;
+      const { error: insertError } = await db.from("rsvps").insert(payload);
+      if (insertError) {
+        if (insertError.code === "23505") return json(req, { error: "Este convite já possui uma confirmação registrada." }, 409);
+        throw insertError;
+      }
       return json(req, { ok: true, message: "Confirmação registrada com sucesso." });
     }
 

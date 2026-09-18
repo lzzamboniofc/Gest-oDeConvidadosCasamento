@@ -77,3 +77,15 @@
 - Modal com status, data/hora, responsável, quantidade confirmada e nomes confirmados.
 - Mensagem para os noivos exibida diretamente no painel, sem depender da exportação.
 - Visual adaptado para desktop e mobile.
+
+
+## v1.10 — revisão geral
+- auditoria completa de referências, sintaxe e integração;
+- correção da política RLS de `weddings` para o perfil Casal;
+- nova `migration_v1_9_to_v1_10.sql` para bancos já criados;
+- confirmação única do RSVP reforçada com `insert` + constraint única, evitando sobrescrita concorrente;
+- imagens responsivas desktop/mobile padronizadas também para galeria e dress code;
+- roteiro recalcula a imagem correta em mudanças de viewport/orientação;
+- documentação do Nível 3 atualizada para refletir Supabase, música e ausência de compartilhamento;
+- modelo Excel validado;
+- referências locais verificadas.

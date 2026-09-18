@@ -31,7 +31,7 @@
   };
   const imageCssValue = (asset) => {
     const src = resolveAssetUrl(asset);
-    return src ? `url("${src.replace(/"/g, '\"')}")` : 'none';
+    return src ? `url("${src.replace(/"/g, '\\"')}")` : 'none';
   };
   document.querySelectorAll('[data-text]').forEach(el => {
     const value = get(el.dataset.text);
@@ -130,31 +130,47 @@
 
   const timeline = document.getElementById('timeline');
   const scheduleSection = document.getElementById('programacao');
-  const defaultScheduleImage = C.schedule?.backgroundImage ? imageCssValue(C.schedule.backgroundImage) : 'none';
-  const setScheduleBackground = (value) => { if (scheduleSection) scheduleSection.style.setProperty('--schedule-bg-image', value || defaultScheduleImage || 'none'); };
-  setScheduleBackground(defaultScheduleImage);
-  (C.schedule?.items || []).forEach(item => {
+  let activeScheduleIndex = null;
+  const defaultScheduleImage = () => C.schedule?.backgroundImage ? imageCssValue(C.schedule.backgroundImage) : 'none';
+  const scheduleItemImage = (index) => C.schedule?.items?.[index]?.image ? imageCssValue(C.schedule.items[index].image) : '';
+  const setScheduleBackground = (value) => {
+    if (scheduleSection) scheduleSection.style.setProperty('--schedule-bg-image', value || defaultScheduleImage() || 'none');
+  };
+  setScheduleBackground(defaultScheduleImage());
+  (C.schedule?.items || []).forEach((item, index) => {
     const row = document.createElement('div'); row.className = 'timeline-item';
-    const itemImage = item.image ? imageCssValue(item.image) : '';
+    row.dataset.scheduleIndex = String(index);
     row.innerHTML = `<time>${item.time}</time><div><h3>${item.title}</h3><p>${item.text}</p></div>`;
-    if (itemImage) {
-      row.dataset.bgImage = itemImage;
-      const activate = () => setScheduleBackground(itemImage);
+    const activate = () => {
+      const itemImage = scheduleItemImage(index);
+      if (!itemImage) return;
+      activeScheduleIndex = index;
+      setScheduleBackground(itemImage);
+    };
+    if (item.image) {
       row.addEventListener('mouseenter', activate);
       row.addEventListener('focusin', activate);
     }
-    row.addEventListener('mouseleave', () => setScheduleBackground(defaultScheduleImage));
-    row.addEventListener('focusout', () => setScheduleBackground(defaultScheduleImage));
+    const deactivate = () => {
+      activeScheduleIndex = null;
+      setScheduleBackground(defaultScheduleImage());
+    };
+    row.addEventListener('mouseleave', deactivate);
+    row.addEventListener('focusout', deactivate);
     timeline?.appendChild(row);
   });
-  timeline?.addEventListener('mouseleave', () => setScheduleBackground(defaultScheduleImage));
+  timeline?.addEventListener('mouseleave', () => {
+    activeScheduleIndex = null;
+    setScheduleBackground(defaultScheduleImage());
+  });
   if (C.schedule?.enabled === false) document.getElementById('programacao')?.remove();
 
   const galleryGrid = document.getElementById('galleryGrid');
   const galleryImages = C.gallery?.images || [];
   galleryImages.forEach((image, index) => {
     const button = document.createElement('button'); button.type = 'button'; button.className = 'gallery-item'; button.dataset.index = index;
-    button.innerHTML = `<img src="${resolveAssetUrl(image.src)}" alt="${image.alt || ''}" loading="lazy"><span>${image.caption || `Foto ${index + 1}`}</span>`;
+    const src = resolveAssetUrl(image.src ?? image);
+    button.innerHTML = `<img src="${src}" alt="${image.alt || ''}" loading="lazy"><span>${image.caption || `Foto ${index + 1}`}</span>`;
     galleryGrid?.appendChild(button);
   });
   if (C.gallery?.enabled === false) document.getElementById('galeria')?.remove();
@@ -167,7 +183,7 @@
     if (!galleryImages.length) return;
     currentImage = (index + galleryImages.length) % galleryImages.length;
     const img = galleryImages[currentImage];
-    lightboxImage.src = resolveAssetUrl(img.src); lightboxImage.alt = img.alt || ''; lightboxCaption.textContent = img.caption || '';
+    lightboxImage.src = resolveAssetUrl(img.src ?? img); lightboxImage.alt = img.alt || ''; lightboxCaption.textContent = img.caption || '';
   };
   const openLightbox = (index) => { showImage(index); lightbox.classList.add('is-open'); lightbox.setAttribute('aria-hidden', 'false'); };
   const closeLightbox = () => { lightbox.classList.remove('is-open'); lightbox.setAttribute('aria-hidden', 'true'); };
@@ -337,7 +353,12 @@
         const asset = C.events?.[index]?.image;
         if (asset) media.style.setProperty('--event-image', imageCssValue(asset));
       });
-      setScheduleBackground(defaultScheduleImage);
+      galleryGrid?.querySelectorAll('.gallery-item img').forEach((img, index) => {
+        const asset = galleryImages?.[index]?.src ?? galleryImages?.[index];
+        const src = resolveAssetUrl(asset);
+        if (src) img.src = src;
+      });
+      setScheduleBackground(activeScheduleIndex === null ? defaultScheduleImage() : scheduleItemImage(activeScheduleIndex));
     }, 120);
   });
 

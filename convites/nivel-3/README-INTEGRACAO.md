@@ -1,4 +1,4 @@
-# Integração com o Sistema de Convidados — v1.3
+# Integração com o Sistema de Convidados — v1.10
 
 O Nível 3 continua funcionando normalmente sem token. Quando recebe `?convite=TOKEN`, tenta carregar o cadastro individual.
 
@@ -33,3 +33,8 @@ guestSystem: {
 ```
 
 Não coloque chave secreta do Supabase no convite. O acesso público passa pela Edge Function e pelo token individual.
+
+
+## Confirmação única
+
+A Edge Function grava o RSVP com `insert` em uma coluna `invitation_id` única. Assim, inclusive em duas requisições simultâneas, apenas a primeira confirmação é aceita.
